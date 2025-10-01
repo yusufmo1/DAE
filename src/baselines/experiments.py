@@ -63,8 +63,8 @@ def run_zero_imputation_experiments(
     os.makedirs(config.PREDICTIONS_DIR, exist_ok=True)
     os.makedirs(config.PLOTS_DIR, exist_ok=True)
 
-    # Get data as numpy array
-    data = preprocessor.scaled_data.numpy()
+    # Get data as numpy array (already numpy, not torch tensor)
+    data = preprocessor.scaled_data
 
     all_results = {}
 

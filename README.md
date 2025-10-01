@@ -52,31 +52,43 @@ pip install -r requirements.txt
 
 ### Run Quick Test (Recommended First)
 
-Test the DAE pipeline with reduced parameters (approximately 5 minutes):
+Test all methods with reduced parameters (approximately 10 minutes total):
 
 ```bash
-python main.py --quick-test
+python run_all.py --quick-test
 ```
 
-This runs 1 experiment with:
-- 1% missingness
-- Learning rate: 10⁻³
-- 256 neurons
-- 100 epochs
-- 1 seed
+This runs a complete pipeline: DAE + KNN + Baselines + Comparisons
 
-Test the KNN pipeline (approximately 10 seconds):
+Or test individual methods:
 
 ```bash
-python knn_main.py --quick-test
+# DAE only (~5 min)
+python run_dae.py --quick-test
+
+# KNN only (~10 seconds)
+python run_knn.py --quick-test
+
+# Baseline only (~5 seconds)
+python run_baseline.py --quick-test
 ```
 
 ### Run Full Experiments
 
+**Complete Pipeline** - All experiments and comparisons:
+
+```bash
+python run_all.py
+```
+
+This runs all methods and generates comparisons automatically.
+
+**Individual Methods:**
+
 **DAE Experiments** - Reproduce all paper results (approximately 6-8 hours on Apple Silicon):
 
 ```bash
-python main.py
+python run_dae.py
 ```
 
 This runs **243 experiments**:
@@ -89,7 +101,7 @@ This runs **243 experiments**:
 **KNN Experiments** - Classical ML baseline (approximately 15-30 minutes):
 
 ```bash
-python knn_main.py
+python run_knn.py
 ```
 
 This runs **90 experiments** in parallel:
@@ -99,12 +111,18 @@ This runs **90 experiments** in parallel:
 - 3 metrics (euclidean, manhattan, cosine)
 - 3 seeds per experiment
 
-### Generate Method Comparisons
-
-After running both DAE and KNN experiments, generate comparison plots:
+**Baseline Experiments** - Naive zero imputation (approximately 1 minute):
 
 ```bash
-python -c "from src.comparison.plots import generate_all_comparisons; generate_all_comparisons()"
+python run_baseline.py
+```
+
+### Generate Method Comparisons
+
+After running experiments, generate comparison plots:
+
+```bash
+python run_comparison.py
 ```
 
 This creates:
@@ -119,36 +137,61 @@ Run specific configurations:
 **DAE:**
 ```bash
 # Test only 1% missingness
-python main.py --missingness 0.01
+python run_dae.py --missingness 0.01
 
 # Test specific learning rates
-python main.py --learning-rates 0.001 0.00001
+python run_dae.py --learning-rates 0.001 0.00001
 
 # Test specific neuron sizes and epochs
-python main.py --neuron-sizes 512 1024 --epochs 500 1000
+python run_dae.py --neuron-sizes 512 1024 --epochs 500 1000
 
 # Use different seeds
-python main.py --seeds 1 2 3 4 5
+python run_dae.py --seeds 1 2 3 4 5
 ```
 
 **KNN:**
 ```bash
 # Test specific K values
-python knn_main.py --k-neighbors 5 10 20
+python run_knn.py --k-neighbors 5 10 20
 
 # Test specific weights and metrics
-python knn_main.py --weights uniform distance --metrics euclidean
+python run_knn.py --weights uniform distance --metrics euclidean
 
 # Test specific missingness rates
-python knn_main.py --missingness 0.01 0.05
+python run_knn.py --missingness 0.01 0.05
+
+# Run sequentially (not parallel)
+python run_knn.py --no-parallel
 ```
 
-### Generate Plots Only
-
-If you already ran experiments and just want to regenerate plots:
-
+**Baselines:**
 ```bash
-python main.py --skip-training
+# Test specific missingness rates
+python run_baseline.py --missingness 0.01 0.05 0.10
+
+# Use different seeds
+python run_baseline.py --seeds 42 50 100
+```
+
+### Advanced Usage
+
+**Skip already-completed experiments:**
+```bash
+# Run all but skip DAE (if already completed)
+python run_all.py --skip-dae
+
+# Skip multiple methods
+python run_all.py --skip-knn --skip-baseline
+```
+
+**Generate comparisons only:**
+```bash
+python run_all.py --comparison-only
+```
+
+**Generate plots only (skip training):**
+```bash
+python run_dae.py --skip-training
 ```
 
 ## Project Structure
@@ -158,6 +201,7 @@ DAE/
 ├── data/
 │   └── material_name_smilesRemoved.csv    # Formulation dataset
 ├── src/
+│   ├── config.py                          # Configuration classes
 │   ├── common/                            # Shared utilities
 │   │   ├── data_preprocessing.py          # Data loading, normalization, corruption
 │   │   └── visualization.py               # Common plotting utilities
@@ -165,15 +209,18 @@ DAE/
 │   │   ├── model.py                       # DAE architecture & device selection
 │   │   ├── train.py                       # Training loop with masked loss
 │   │   ├── evaluate.py                    # Metrics computation
-│   │   └── plots.py                       # DAE-specific visualizations
+│   │   ├── plots.py                       # DAE-specific visualizations
+│   │   └── experiments.py                 # DAE experiment orchestration
 │   ├── knn/                               # K-Nearest Neighbors baseline
 │   │   ├── imputation.py                  # KNN imputer
 │   │   ├── evaluate.py                    # KNN metrics & timing
-│   │   └── plots.py                       # KNN visualizations
+│   │   ├── plots.py                       # KNN visualizations
+│   │   └── experiments.py                 # KNN experiment orchestration
 │   ├── baselines/                         # Additional baseline methods
 │   │   ├── zero_imputer.py                # Naive zero-filling baseline
 │   │   ├── evaluate.py                    # Baseline metrics
-│   │   └── plots.py                       # Baseline visualizations
+│   │   ├── plots.py                       # Baseline visualizations
+│   │   └── experiments.py                 # Baseline experiment orchestration
 │   └── comparison/                        # Cross-method comparisons
 │       └── plots.py                       # DAE vs KNN vs Zero comparisons
 ├── results/
@@ -188,13 +235,20 @@ DAE/
 │   │   ├── plots/                         # KNN figures
 │   │   └── summary.json                   # All KNN results
 │   ├── baselines/                         # Baseline outputs
+│   │   ├── metrics/
+│   │   ├── predictions/
+│   │   ├── plots/
+│   │   └── summary.json
 │   └── comparisons/                       # Method comparison outputs
 │       ├── method_comparison.png
 │       ├── performance_vs_time.png
 │       └── comparison_table.txt
 ├── requirements.txt                       # Python dependencies
-├── main.py                                # DAE pipeline orchestrator
-├── knn_main.py                            # KNN baseline pipeline
+├── run_all.py                             # Master orchestrator (all experiments)
+├── run_dae.py                             # DAE experiments entry point
+├── run_knn.py                             # KNN experiments entry point
+├── run_baseline.py                        # Baseline experiments entry point
+├── run_comparison.py                      # Comparison generation entry point
 ├── CLAUDE.md                              # Developer documentation
 └── README.md                              # This file
 ```
@@ -261,7 +315,7 @@ The paper reports these R² scores for DAE imputation:
 
 4. **Method comparison**
    - Run both DAE and KNN experiments to compare neural network vs. classical ML approaches
-   - Use `generate_all_comparisons()` to create side-by-side performance analysis
+   - Use `python run_comparison.py` to create side-by-side performance analysis
 
 ## Hardware Requirements
 
@@ -274,13 +328,19 @@ The paper reports these R² scores for DAE imputation:
 
 ## Estimated Runtime
 
-On Apple M1 Pro:
-- Quick test: ~5 minutes
-- Full pipeline (243 experiments): ~6-8 hours
+**On Apple M1 Pro:**
+- Quick test (`run_all.py --quick-test`): ~10 minutes
+- DAE only (`run_dae.py`): ~6-8 hours (243 experiments)
+- KNN only (`run_knn.py`): ~15-30 minutes (90 experiments)
+- Baselines only (`run_baseline.py`): ~1 minute
+- Full pipeline (`run_all.py`): ~7-9 hours total
 
-On CPU only:
-- Quick test: ~15 minutes
-- Full pipeline: ~24-48 hours
+**On CPU only:**
+- Quick test: ~20-30 minutes
+- DAE only: ~24-48 hours
+- KNN only: ~1-2 hours
+- Baselines only: ~5 minutes
+- Full pipeline: ~25-50 hours total
 
 ## Module Usage
 
