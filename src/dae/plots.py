@@ -42,7 +42,7 @@ def plot_dae_loss_curves(
     lr_labels = [r'$10^{-1}$', r'$10^{-3}$', r'$10^{-5}$']
 
     # Use 2x2 layout with legend in bottom-right
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle(f'Loss Curves - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
     axes = axes.flatten()
@@ -71,7 +71,9 @@ def plot_dae_loss_curves(
                            alpha=0.8)
 
         ax.set_xlabel('Epochs', fontweight='bold')
-        ax.set_ylabel('Loss' if idx % 2 == 0 else '', fontweight='bold')
+        # Add ylabel to left column (idx 0, 2) and top-right (idx 1)
+        if idx % 2 == 0 or idx == 1:
+            ax.set_ylabel('Loss', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) LR={lr_label}',
                     fontweight='bold', loc='left')
         ax.grid(True, alpha=0.3)
@@ -135,8 +137,8 @@ def plot_dae_r2_bars(
     epoch_list = [100, 500, 1000, 1200]
 
     # Use 2x2 layout with legend in bottom-right
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    fig.suptitle(f'R² Scores - {missingness_rate*100:.0f}% Missing Data',
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    fig.suptitle(r'$R^2$ Scores - ' + f'{missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
     axes = axes.flatten()
 
@@ -170,7 +172,9 @@ def plot_dae_r2_bars(
                       alpha=0.8)
 
         ax.set_xlabel('Neurone size', fontweight='bold')
-        ax.set_ylabel('R²' if idx % 2 == 0 else '', fontweight='bold')
+        # Add ylabel to left column (idx 0, 2) and top-right (idx 1)
+        if idx % 2 == 0 or idx == 1:
+            ax.set_ylabel(r'$R^2$', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) LR={lr_label}', fontweight='bold', loc='left')
         ax.set_xticks(x_pos)
         ax.set_xticklabels(neuron_sizes)

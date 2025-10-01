@@ -108,7 +108,7 @@ def plot_method_comparison(
         'Median': '#8c564b'
     }
 
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(10, 5))
 
     # Plot bars for each method
     for idx, (method_name, results) in enumerate(method_results.items()):
@@ -126,7 +126,7 @@ def plot_method_comparison(
                label=method_name, capsize=5, color=color, alpha=0.8)
 
     ax.set_xlabel('Missingness Rate', fontweight='bold')
-    ax.set_ylabel('R² Score', fontweight='bold')
+    ax.set_ylabel(r'$R^2$ Score', fontweight='bold')
     ax.set_title('Method Comparison: All Imputation Methods', fontweight='bold', fontsize=14)
     ax.set_xticks(x_pos)
     ax.set_xticklabels([f'{mr*100:.0f}%' for mr in missingness_rates])
@@ -160,7 +160,7 @@ def plot_performance_vs_time(
         save_path: Path to save figure
         show: Whether to display plot
     """
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
     fig.suptitle('Performance vs. Computational Time Trade-off', fontweight='bold', fontsize=14)
 
     missingness_rates = [0.01, 0.05, 0.10]
@@ -207,7 +207,7 @@ def plot_performance_vs_time(
                           color=color, marker=marker, label=method_name)
 
         ax.set_xlabel('Time (log scale)', fontweight='bold')
-        ax.set_ylabel('R² Score' if idx == 0 else '', fontweight='bold')
+        ax.set_ylabel(r'$R^2$ Score' if idx == 0 else '', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) {miss_rate*100:.0f}% Missing', fontweight='bold', loc='left')
         ax.set_xscale('log')
         ax.legend(loc='best')

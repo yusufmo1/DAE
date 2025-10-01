@@ -59,7 +59,7 @@ def plot_r2_comparison(
                label=method, color=colors[idx % len(colors)], alpha=0.8)
 
     ax.set_xlabel('Configuration', fontweight='bold')
-    ax.set_ylabel('R² Score', fontweight='bold')
+    ax.set_ylabel(r'$R^2$ Score', fontweight='bold')
     ax.set_title(title, fontweight='bold', fontsize=14)
     ax.set_xticks(x_pos)
     ax.set_xticklabels(x_labels)
@@ -119,7 +119,7 @@ def plot_predictions_vs_truth(
     if add_r2:
         from sklearn.metrics import r2_score
         r2 = r2_score(targets, predictions)
-        ax.text(0.05, 0.95, f'R² = {r2:.4f}',
+        ax.text(0.05, 0.95, r'$R^2$ = ' + f'{r2:.4f}',
                 transform=ax.transAxes, fontsize=11,
                 verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
@@ -172,7 +172,7 @@ def plot_multi_predictions_vs_truth(
     # Use 2x2 layout with shared legend in bottom-right if requested
     if use_shared_legend and num_plots == 3:
         num_rows, num_cols = 2, 2
-        fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 10))
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 8))
         axes = axes.flatten()
     else:
         num_rows = (num_plots + num_cols - 1) // num_cols
@@ -204,7 +204,7 @@ def plot_multi_predictions_vs_truth(
         # Add R²
         from sklearn.metrics import r2_score
         r2 = r2_score(targets, predictions)
-        ax.text(0.05, 0.95, f'R² = {r2:.4f}',
+        ax.text(0.05, 0.95, r'$R^2$ = ' + f'{r2:.4f}',
                 transform=ax.transAxes, fontsize=10,
                 verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))

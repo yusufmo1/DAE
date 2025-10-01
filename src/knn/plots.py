@@ -42,8 +42,8 @@ def plot_knn_r2_bars(
     metric_labels = ['Euclidean', 'Manhattan', 'Cosine']
 
     # Use 2x2 layout with legend in bottom-right
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    fig.suptitle(f'KNN R² Scores - {missingness_rate*100:.0f}% Missing Data',
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
+    fig.suptitle(r'KNN $R^2$ Scores - ' + f'{missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
     axes = axes.flatten()
 
@@ -91,7 +91,9 @@ def plot_knn_r2_bars(
                label='Distance', capsize=5, color=colors['distance'], alpha=0.8)
 
         ax.set_xlabel('K (Neighbors)', fontweight='bold')
-        ax.set_ylabel('R² Score' if idx % 2 == 0 else '', fontweight='bold')
+        # Add ylabel to left column (idx 0, 2) and top-right (idx 1)
+        if idx % 2 == 0 or idx == 1:
+            ax.set_ylabel(r'$R^2$ Score', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) {label} Distance', fontweight='bold', loc='left')
         ax.set_xticks(x)
         ax.set_xticklabels([str(k) for k in k_values])
@@ -170,7 +172,7 @@ def plot_knn_performance_summary(
         save_path: Path to save figure
         show: Whether to display the plot
     """
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
     fig.suptitle(f'KNN Performance Summary - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
 
@@ -193,8 +195,8 @@ def plot_knn_performance_summary(
                     label=label, color=colors[metric])
 
     ax1.set_xlabel('K (Neighbors)', fontweight='bold')
-    ax1.set_ylabel('R² Score', fontweight='bold')
-    ax1.set_title('(A) R² vs K (Distance-Weighted)', fontweight='bold', loc='left')
+    ax1.set_ylabel(r'$R^2$ Score', fontweight='bold')
+    ax1.set_title(r'(A) $R^2$ vs K (Distance-Weighted)', fontweight='bold', loc='left')
     ax1.legend(loc='best')
     ax1.grid(True, alpha=0.3)
     ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
