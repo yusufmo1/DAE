@@ -49,10 +49,10 @@ class KNNConfig:
     EXPERIMENT_N_JOBS = 12  # Run 12 experiments in parallel
 
     # Output directories
-    RESULTS_DIR = 'knn_results'
-    METRICS_DIR = 'knn_results/metrics'
-    PREDICTIONS_DIR = 'knn_results/predictions'
-    PLOTS_DIR = 'knn_results/plots'
+    RESULTS_DIR = 'results/knn'
+    METRICS_DIR = 'results/knn/metrics'
+    PREDICTIONS_DIR = 'results/knn/predictions'
+    PLOTS_DIR = 'results/knn/plots'
 
 
 def run_single_knn_experiment(

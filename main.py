@@ -38,10 +38,10 @@ class ExperimentConfig:
     NOISE_STD = 0.1
 
     # Output directories
-    RESULTS_DIR = 'results'
-    MODELS_DIR = 'results/models'
-    METRICS_DIR = 'results/metrics'
-    PLOTS_DIR = 'results/plots'
+    RESULTS_DIR = 'results/dae'
+    MODELS_DIR = 'results/dae/models'
+    METRICS_DIR = 'results/dae/metrics'
+    PLOTS_DIR = 'results/dae/plots'
 
 
 def run_single_experiment(

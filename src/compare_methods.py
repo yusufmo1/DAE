@@ -18,7 +18,7 @@ plt.rcParams['axes.labelsize'] = 12
 plt.rcParams['axes.titlesize'] = 13
 
 
-def load_dae_results(results_dir: str = 'results') -> Dict:
+def load_dae_results(results_dir: str = 'results/dae') -> Dict:
     """
     Load DAE results from summary file.
 
@@ -40,7 +40,7 @@ def load_dae_results(results_dir: str = 'results') -> Dict:
     return results
 
 
-def load_knn_results(results_dir: str = 'knn_results') -> Dict:
+def load_knn_results(results_dir: str = 'results/knn') -> Dict:
     """
     Load KNN results from summary file.
 
@@ -334,9 +334,9 @@ def generate_comparison_table(
 
 
 def generate_all_comparisons(
-    dae_results_dir: str = 'results',
-    knn_results_dir: str = 'knn_results',
-    output_dir: str = 'compare_results'
+    dae_results_dir: str = 'results/dae',
+    knn_results_dir: str = 'results/knn',
+    output_dir: str = 'results/comparisons'
 ):
     """
     Generate all comparison visualizations and tables.

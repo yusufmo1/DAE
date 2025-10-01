@@ -259,7 +259,7 @@ def plot_knn_performance_summary(
 
 
 def load_knn_results_for_plots(
-    results_dir: str = 'knn_results',
+    results_dir: str = 'results/knn',
     missingness_rate: float = 0.01
 ) -> Tuple[Dict, Dict, Dict]:
     """
@@ -326,8 +326,8 @@ def load_knn_results_for_plots(
 
 
 def generate_all_knn_plots(
-    results_dir: str = 'knn_results',
-    plots_dir: str = 'knn_results/plots'
+    results_dir: str = 'results/knn',
+    plots_dir: str = 'results/knn/plots'
 ):
     """
     Generate all KNN visualization plots for each missingness rate.

@@ -12,18 +12,37 @@ The pipeline implements **Denoising Autoencoders (DAEs)** to impute missing valu
 
 - ✅ **MPS Support**: Automatically uses Apple Silicon GPU (MPS) for training on Mac
 - ✅ **Reproducible**: Uses fixed random seeds (42, 50, 100) for statistical robustness
-- ✅ **Comprehensive**: Tests 27 configurations per missingness level
+- ✅ **Comprehensive**: Tests 243 experiments (3×3×3×3 configs × 3 seeds)
 - ✅ **Publication-Ready**: Generates plots matching the paper figures
+- ✅ **Masked Loss**: Loss computed only on artificially corrupted values
+- ✅ **KNN Baseline**: Includes classical ML comparison
+
+### DAE Architecture
+
+The Denoising Autoencoder uses an overcomplete architecture:
+```
+Input (382 dims)
+  → FC + BatchNorm + LeakyReLU (hidden_dim)
+  → FC + BatchNorm + LeakyReLU (latent_dim)
+  → FC + Sigmoid (382 dims)
+```
+
+Key design choices:
+- **Overcomplete**: `hidden_dim = latent_dim = neuron_size` (256/512/1024)
+- **Denoising**: Gaussian noise (σ=0.1) added during training
+- **Masked loss**: Only corrupted values contribute to loss (not entire reconstruction)
+
+### Data Corruption Strategy
+
+Training uses a two-step corruption process:
+1. **Masking**: Randomly select values based on missingness rate (1%, 5%, 10%)
+2. **Zeroing + Noise**: Set masked values to zero, then add Gaussian noise (σ=0.1) to all values
+
+The model learns to denoise and impute the masked values while ignoring the ~99% of naturally-occurring zeros (unused ingredients).
 
 ## Installation
 
-### 1. Clone/Navigate to the directory
-
-```bash
-cd ollima
-```
-
-### 2. Install dependencies
+### 1. Install dependencies
 
 ```bash
 pip install -r requirements.txt
@@ -58,7 +77,7 @@ This runs **243 experiments**:
 - 3 missingness rates (1%, 5%, 10%)
 - 3 learning rates (10⁻¹, 10⁻³, 10⁻⁵)
 - 3 neuron sizes (256, 512, 1024)
-- 3 epoch settings (100, 500, 1000, 1200)
+- 3 epoch settings (100, 1000, 1200)
 - 3 seeds per experiment
 
 ### Custom Experiments
@@ -87,10 +106,41 @@ If you already ran experiments and just want to regenerate plots:
 python main.py --skip-training
 ```
 
+## KNN Baseline Comparison
+
+The repository includes a K-Nearest Neighbors (KNN) imputation baseline for comparison with the DAE approach.
+
+### Run KNN Experiments
+
+Test different KNN configurations:
+
+```bash
+# Quick test (5 neighbors, uniform weights)
+python knn_main.py --quick-test
+
+# Full KNN experiments
+python knn_main.py
+
+# Custom KNN configurations
+python knn_main.py --n-neighbors 5 10 20 --weights uniform distance
+python knn_main.py --metrics euclidean manhattan
+```
+
+### KNN Configuration Space
+
+The KNN pipeline tests:
+- **N-neighbors**: 3, 5, 10, 20, 50
+- **Weights**: uniform, distance
+- **Metrics**: euclidean, manhattan, cosine
+- **Missingness**: 1%, 5%, 10% (same as DAE)
+- **Seeds**: 42, 50, 100 (for reproducibility)
+
+Results saved to `results/knn_*` for direct comparison with DAE performance.
+
 ## Project Structure
 
 ```
-ollima/
+DAE/
 ├── data/
 │   └── material_name_smilesRemoved.csv    # Formulation dataset
 ├── src/
@@ -98,14 +148,21 @@ ollima/
 │   ├── model.py                           # DAE architecture
 │   ├── train.py                           # Training logic
 │   ├── evaluate.py                        # Metrics computation
-│   └── visualize.py                       # Plot generation
+│   ├── visualize.py                       # Plot generation
+│   ├── knn_imputation.py                  # KNN imputer
+│   ├── knn_evaluate.py                    # KNN metrics
+│   └── knn_visualize.py                   # KNN plotting
 ├── results/
-│   ├── models/                            # Trained model checkpoints
-│   ├── metrics/                           # JSON metrics & loss histories
-│   ├── plots/                             # Generated figures
+│   ├── models/                            # Trained DAE checkpoints
+│   ├── metrics/                           # DAE metrics & loss histories
+│   ├── plots/                             # DAE figures
+│   ├── knn_metrics/                       # KNN metrics & predictions
+│   ├── knn_plots/                         # KNN comparison figures
 │   └── summary.json                       # Aggregated results
 ├── requirements.txt                       # Python dependencies
-├── main.py                                # Main pipeline orchestrator
+├── main.py                                # DAE pipeline orchestrator
+├── knn_main.py                            # KNN baseline pipeline
+├── CLAUDE.md                              # Developer documentation
 └── README.md                              # This file
 ```
 
