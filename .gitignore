@@ -1,10 +1,7 @@
 # Results and outputs - tracking selected results for reproducibility
 # Ignore large DAE model checkpoints and predictions
 results/dae/models/
-results/dae/metrics/*.npz
-
-# Ignore KNN predictions (large .npz files)
-results/knn/predictions/
+*.npz
 
 # Keep: metrics JSON, plots, summary.json
 

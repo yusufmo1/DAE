@@ -1,28 +1,28 @@
 """
-Visualization module for DAE results.
-Creates plots matching the paper figures.
+DAE-specific visualization module.
+Creates plots for DAE results using common visualization utilities.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional
 import os
 import json
+import sys
+from typing import Dict, List, Tuple, Optional
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from common.visualization import (
+    plot_predictions_vs_truth,
+    plot_multi_predictions_vs_truth,
+    plot_loss_curves,
+    load_predictions_from_file,
+    load_metrics_from_file
+)
 
 
-# Set style
-sns.set_style('whitegrid')
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 14
-
-
-def plot_loss_curves(
+def plot_dae_loss_curves(
     loss_data: Dict,
     missingness_rate: float,
     save_path: Optional[str] = None,
@@ -42,7 +42,7 @@ def plot_loss_curves(
     lr_labels = ['10⁻¹', '10⁻³', '10⁻⁵']
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'Loss Curves - {missingness_rate*100:.0f}% Missing Data',
+    fig.suptitle(f'DAE Loss Curves - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
 
     colors = {256: '#1f77b4', 512: '#ff7f0e', 1024: '#2ca02c'}
@@ -69,7 +69,7 @@ def plot_loss_curves(
                            alpha=0.8)
 
         ax.set_xlabel('Epochs', fontweight='bold')
-        ax.set_ylabel('R²' if idx == 0 else '', fontweight='bold')
+        ax.set_ylabel('Loss' if idx == 0 else '', fontweight='bold')
         ax.set_title(f'({chr(65+idx)})      Learning Rate: {lr_label}',
                     fontweight='bold', loc='left')
         ax.legend(loc='best')
@@ -93,7 +93,7 @@ def plot_loss_curves(
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Loss curves saved to {save_path}")
+        print(f"DAE loss curves saved to {save_path}")
 
     if show:
         plt.show()
@@ -101,7 +101,7 @@ def plot_loss_curves(
         plt.close()
 
 
-def plot_r2_bars(
+def plot_dae_r2_bars(
     results_data: Dict,
     missingness_rate: float,
     save_path: Optional[str] = None,
@@ -123,7 +123,7 @@ def plot_r2_bars(
     epoch_list = [100, 500, 1000, 1200]
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'R² Scores - {missingness_rate*100:.0f}% Missing Data',
+    fig.suptitle(f'DAE R² Scores - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
 
     # Colors for different epochs
@@ -162,8 +162,6 @@ def plot_r2_bars(
         ax.set_xticklabels(neuron_sizes)
         ax.legend(loc='best')
         ax.grid(True, alpha=0.3, axis='y')
-
-        # Add horizontal line at y=0
         ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.5)
 
     plt.tight_layout()
@@ -171,7 +169,7 @@ def plot_r2_bars(
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"R² bar plot saved to {save_path}")
+        print(f"DAE R² bar plot saved to {save_path}")
 
     if show:
         plt.show()
@@ -179,7 +177,7 @@ def plot_r2_bars(
         plt.close()
 
 
-def plot_predictions_vs_truth(
+def plot_dae_predictions_vs_truth(
     predictions_data: Dict,
     missingness_rate: float,
     save_path: Optional[str] = None,
@@ -198,57 +196,22 @@ def plot_predictions_vs_truth(
     learning_rates = [1e-1, 1e-3, 1e-5]
     lr_labels = ['10⁻¹', '10⁻³', '10⁻⁵']
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'Predicted vs Ground Truth - {missingness_rate*100:.0f}% Missing Data',
-                 fontsize=14, fontweight='bold')
+    subplot_titles = [f'({chr(65+idx)}) LR={lr_label}'
+                      for idx, lr_label in enumerate(lr_labels)]
 
-    for idx, (lr, lr_label) in enumerate(zip(learning_rates, lr_labels)):
-        ax = axes[idx]
-
-        if lr in predictions_data:
-            predictions = predictions_data[lr]['predictions']
-            targets = predictions_data[lr]['targets']
-
-            # Plot scatter
-            ax.scatter(targets, predictions,
-                      alpha=0.5, s=20,
-                      color='#1f77b4',
-                      label='Individual Predictions',
-                      edgecolors='none')
-
-            # Plot diagonal line (ideal predictions)
-            min_val = min(targets.min(), predictions.min())
-            max_val = max(targets.max(), predictions.max())
-            ax.plot([min_val, max_val], [min_val, max_val],
-                   'k--', linewidth=1.5,
-                   label='Ideal Predictions',
-                   alpha=0.7)
-
-        ax.set_xlabel('Ground Truth', fontweight='bold')
-        ax.set_ylabel('Predicted' if idx == 0 else '', fontweight='bold')
-        ax.set_title(f'({chr(65+idx)})', fontweight='bold', loc='left')
-        ax.set_xlim(0, 1)
-        ax.set_ylim(0, 1)
-        ax.legend(loc='best')
-        ax.grid(True, alpha=0.3)
-        ax.set_aspect('equal')
-
-    plt.tight_layout()
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Predictions vs truth plot saved to {save_path}")
-
-    if show:
-        plt.show()
-    else:
-        plt.close()
+    plot_multi_predictions_vs_truth(
+        predictions_data,
+        num_cols=3,
+        overall_title=f'DAE: Predicted vs Ground Truth - {missingness_rate*100:.0f}% Missing Data',
+        subplot_titles=subplot_titles,
+        save_path=save_path,
+        show=show
+    )
 
 
-def load_results_for_plotting(results_dir: str, missingness_rate: float) -> Tuple[Dict, Dict, Dict]:
+def load_dae_results_for_plotting(results_dir: str, missingness_rate: float) -> Tuple[Dict, Dict, Dict]:
     """
-    Load all results needed for plotting.
+    Load all DAE results needed for plotting.
 
     Args:
         results_dir: Directory containing results
@@ -311,9 +274,10 @@ def load_results_for_plotting(results_dir: str, missingness_rate: float) -> Tupl
     return loss_data, r2_data, predictions_data
 
 
-def create_all_plots(results_dir: str, missingness_rates: List[float] = [0.01, 0.05, 0.10]):
+def generate_all_dae_plots(results_dir: str = 'results/dae',
+                           missingness_rates: List[float] = [0.01, 0.05, 0.10]):
     """
-    Create all plots for the paper.
+    Create all DAE plots for the paper.
 
     Args:
         results_dir: Directory containing results
@@ -322,23 +286,27 @@ def create_all_plots(results_dir: str, missingness_rates: List[float] = [0.01, 0
     plots_dir = os.path.join(results_dir, 'plots')
     os.makedirs(plots_dir, exist_ok=True)
 
+    print("="*80)
+    print("GENERATING DAE VISUALIZATIONS")
+    print("="*80)
+
     for miss_rate in missingness_rates:
         print(f"\nCreating plots for {miss_rate*100:.0f}% missingness...")
 
         # Load data
-        loss_data, r2_data, predictions_data = load_results_for_plotting(
+        loss_data, r2_data, predictions_data = load_dae_results_for_plotting(
             results_dir, miss_rate
         )
 
         # Plot loss curves
-        plot_loss_curves(
+        plot_dae_loss_curves(
             loss_data, miss_rate,
             save_path=os.path.join(plots_dir, f'loss_curves_{miss_rate*100:.0f}pct.png'),
             show=False
         )
 
         # Plot R² bars
-        plot_r2_bars(
+        plot_dae_r2_bars(
             r2_data, miss_rate,
             save_path=os.path.join(plots_dir, f'r2_bars_{miss_rate*100:.0f}pct.png'),
             show=False
@@ -346,15 +314,21 @@ def create_all_plots(results_dir: str, missingness_rates: List[float] = [0.01, 0
 
         # Plot predictions vs truth (only for 1% missingness as in paper)
         if miss_rate == 0.01 and predictions_data:
-            plot_predictions_vs_truth(
+            plot_dae_predictions_vs_truth(
                 predictions_data, miss_rate,
                 save_path=os.path.join(plots_dir, f'pred_vs_truth_{miss_rate*100:.0f}pct.png'),
                 show=False
             )
 
-    print(f"\nAll plots saved to {plots_dir}")
+    print(f"\n{'='*80}")
+    print("DAE VISUALIZATIONS COMPLETE!")
+    print(f"{'='*80}")
+    print(f"\nAll plots saved to: {plots_dir}/")
+    print("  - loss_curves_*.png")
+    print("  - r2_bars_*.png")
+    print("  - pred_vs_truth_*.png")
+    print(f"\n{'='*80}")
 
 
 if __name__ == "__main__":
-    print("This module provides visualization utilities.")
-    print("Use main.py to run full experiments and generate plots.")
+    generate_all_dae_plots()

@@ -1,25 +1,25 @@
 """
-Visualization module for KNN results.
-Creates plots matching the paper style (excluding training-specific plots).
+KNN-specific visualization module.
+Creates plots for KNN results using common visualization utilities.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List, Tuple, Optional
 import os
 import json
+import sys
+from typing import Dict, List, Tuple, Optional
 
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set style
-sns.set_style('whitegrid')
-plt.rcParams['font.size'] = 11
-plt.rcParams['axes.labelsize'] = 12
-plt.rcParams['axes.titlesize'] = 13
-plt.rcParams['xtick.labelsize'] = 10
-plt.rcParams['ytick.labelsize'] = 10
-plt.rcParams['legend.fontsize'] = 10
-plt.rcParams['figure.titlesize'] = 14
+from common.visualization import (
+    plot_predictions_vs_truth,
+    plot_multi_predictions_vs_truth,
+    plot_r2_comparison,
+    load_predictions_from_file,
+    load_metrics_from_file
+)
 
 
 def plot_knn_r2_bars(
@@ -102,7 +102,7 @@ def plot_knn_r2_bars(
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"R² bar plot saved to {save_path}")
+        print(f"KNN R² bar plot saved to {save_path}")
 
     if show:
         plt.show()
@@ -129,53 +129,17 @@ def plot_knn_predictions_vs_truth(
     metrics = ['euclidean', 'manhattan', 'cosine']
     metric_labels = ['Euclidean', 'Manhattan', 'Cosine']
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'KNN Predictions vs Truth - {missingness_rate*100:.0f}% Missing Data',
-                 fontsize=14, fontweight='bold')
+    subplot_titles = [f'({chr(65+idx)}) {label}'
+                      for idx, label in enumerate(metric_labels)]
 
-    for idx, (metric, label) in enumerate(zip(metrics, metric_labels)):
-        ax = axes[idx]
-
-        if metric in predictions_data:
-            preds = predictions_data[metric]['predictions']
-            targets = predictions_data[metric]['targets']
-
-            # Scatter plot
-            ax.scatter(targets, preds, alpha=0.3, s=1, color='#1f77b4')
-
-            # Perfect prediction line
-            min_val = min(targets.min(), preds.min())
-            max_val = max(targets.max(), preds.max())
-            ax.plot([min_val, max_val], [min_val, max_val],
-                   'r--', linewidth=2, label='Perfect prediction')
-
-            # Calculate R²
-            from sklearn.metrics import r2_score
-            r2 = r2_score(targets, preds)
-
-            ax.text(0.05, 0.95, f'R² = {r2:.4f}',
-                   transform=ax.transAxes, fontsize=11,
-                   verticalalignment='top',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-
-        ax.set_xlabel('Ground Truth', fontweight='bold')
-        ax.set_ylabel('Predictions' if idx == 0 else '', fontweight='bold')
-        ax.set_title(f'({chr(65+idx)}) {label}', fontweight='bold', loc='left')
-        ax.grid(True, alpha=0.3)
-        if idx == 0:
-            ax.legend(loc='lower right')
-
-    plt.tight_layout()
-
-    if save_path:
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Predictions vs truth plot saved to {save_path}")
-
-    if show:
-        plt.show()
-    else:
-        plt.close()
+    plot_multi_predictions_vs_truth(
+        predictions_data,
+        num_cols=3,
+        overall_title=f'KNN Predictions vs Truth - {missingness_rate*100:.0f}% Missing Data',
+        subplot_titles=subplot_titles,
+        save_path=save_path,
+        show=show
+    )
 
 
 def plot_knn_performance_summary(
@@ -250,7 +214,7 @@ def plot_knn_performance_summary(
     if save_path:
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"Performance summary plot saved to {save_path}")
+        print(f"KNN performance summary plot saved to {save_path}")
 
     if show:
         plt.show()
@@ -327,22 +291,21 @@ def load_knn_results_for_plots(
 
 def generate_all_knn_plots(
     results_dir: str = 'results/knn',
-    plots_dir: str = 'results/knn/plots'
+    missingness_rates: List[float] = [0.01, 0.05, 0.10]
 ):
     """
     Generate all KNN visualization plots for each missingness rate.
 
     Args:
         results_dir: Directory containing KNN results
-        plots_dir: Directory to save plots
+        missingness_rates: List of missingness rates to plot
     """
     print("="*80)
     print("GENERATING KNN VISUALIZATIONS")
     print("="*80)
 
+    plots_dir = os.path.join(results_dir, 'plots')
     os.makedirs(plots_dir, exist_ok=True)
-
-    missingness_rates = [0.01, 0.05, 0.10]
 
     for miss_rate in missingness_rates:
         print(f"\nGenerating plots for {miss_rate*100:.0f}% missingness...")

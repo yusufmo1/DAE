@@ -7,7 +7,7 @@ import numpy as np
 import json
 import os
 from typing import Dict, List
-from knn_imputation import KNNImputer
+from .imputation import KNNImputer
 
 
 def evaluate_knn_imputation(

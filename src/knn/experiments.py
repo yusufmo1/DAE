@@ -1,23 +1,20 @@
 """
-KNN imputation pipeline for pharmaceutical formulation data.
-Provides classical ML baseline for comparison with DAE approach.
+KNN experiment orchestration logic.
+Handles running KNN experiments across multiple configurations and seeds, with parallel execution support.
 """
 
-import sys
-import os
-sys.path.append('src')
-
 import numpy as np
-import argparse
+import os
+import json
 from typing import Dict, List
 from itertools import product
-import json
 from tqdm import tqdm
 from joblib import Parallel, delayed
 
-from data_preprocessing import FormulationDataPreprocessor
-from knn_imputation import create_knn_imputer
-from knn_evaluate import (
+from ..common.data_preprocessing import FormulationDataPreprocessor
+from ..config import KNNConfig
+from .imputation import create_knn_imputer
+from .evaluate import (
     evaluate_knn_imputation,
     aggregate_knn_results,
     save_knn_metrics,
@@ -25,38 +22,12 @@ from knn_evaluate import (
     compare_knn_configs,
     print_knn_summary
 )
+from .plots import generate_all_knn_plots
 
 
-class KNNConfig:
-    """Configuration for KNN experiments."""
-    # Data parameters (same as DAE)
-    DATA_PATH = 'data/material_name_smilesRemoved.csv'
-    METADATA_COLS = 6
-
-    # Missingness rates (same as DAE)
-    MISSINGNESS_RATES = [0.01, 0.05, 0.10]  # 1%, 5%, 10%
-    SEEDS = [42, 50, 100]
-
-    # KNN-specific parameters
-    N_NEIGHBORS = [3, 5, 10, 20, 50]
-    WEIGHTS = ['uniform', 'distance']
-    METRICS = ['euclidean', 'manhattan', 'cosine']
-
-    # Parallel processing for NearestNeighbors
-    NN_N_JOBS = -1  # Use all CPU cores for neighbor search
-
-    # Parallel processing for experiment queue
-    EXPERIMENT_N_JOBS = 12  # Run 12 experiments in parallel
-
-    # Output directories
-    RESULTS_DIR = 'results/knn'
-    METRICS_DIR = 'results/knn/metrics'
-    PREDICTIONS_DIR = 'results/knn/predictions'
-    PLOTS_DIR = 'results/knn/plots'
-
-
-def run_single_knn_experiment(
+def run_single_experiment(
     preprocessor: FormulationDataPreprocessor,
+    config: KNNConfig,
     missingness_rate: float,
     n_neighbors: int,
     weights: str,
@@ -70,6 +41,7 @@ def run_single_knn_experiment(
 
     Args:
         preprocessor: Data preprocessor with loaded data
+        config: KNN configuration object
         missingness_rate: Proportion of data to mask
         n_neighbors: Number of neighbors for KNN
         weights: Weighting scheme ('uniform' or 'distance')
@@ -79,7 +51,7 @@ def run_single_knn_experiment(
         verbose: Whether to print progress
 
     Returns:
-        Dictionary with aggregated results
+        Dictionary with aggregated results across seeds
     """
     if verbose:
         print(f"\n{'='*80}")
@@ -96,7 +68,7 @@ def run_single_knn_experiment(
         n_neighbors=n_neighbors,
         weights=weights,
         metric=metric,
-        n_jobs=KNNConfig.NN_N_JOBS,
+        n_jobs=config.NN_N_JOBS,
         verbose=verbose
     )
 
@@ -107,7 +79,7 @@ def run_single_knn_experiment(
         # Prepare corrupted data (same as DAE)
         original_data, corrupted_data, mask = preprocessor.prepare_data(
             missingness_rate=missingness_rate,
-            noise_std=0.1,  # Same noise as DAE
+            noise_std=config.NOISE_STD,
             seed=seed
         )
 
@@ -138,14 +110,14 @@ def run_single_knn_experiment(
         # Save aggregated metrics
         config_str = f"miss{missingness_rate}_k{n_neighbors}_{weights}_{metric}"
         metrics_file = os.path.join(
-            KNNConfig.METRICS_DIR,
+            config.METRICS_DIR,
             f'{config_str}_metrics.json'
         )
         save_knn_metrics(aggregated, metrics_file)
 
         # Save predictions from first seed
         pred_file = os.path.join(
-            KNNConfig.PREDICTIONS_DIR,
+            config.PREDICTIONS_DIR,
             f'{config_str}_predictions.npz'
         )
         np.savez(pred_file, predictions=predictions_list[0], targets=targets_list[0])
@@ -162,6 +134,7 @@ def run_single_knn_experiment(
 def _run_experiment_wrapper(
     args: tuple,
     preprocessor: FormulationDataPreprocessor,
+    config: KNNConfig,
     seeds: List[int]
 ) -> tuple:
     """
@@ -170,6 +143,7 @@ def _run_experiment_wrapper(
     Args:
         args: Tuple of (miss_rate, k, weights, metric)
         preprocessor: Data preprocessor
+        config: KNN configuration
         seeds: List of seeds
 
     Returns:
@@ -177,8 +151,9 @@ def _run_experiment_wrapper(
     """
     miss_rate, k, weights, metric = args
 
-    result = run_single_knn_experiment(
+    result = run_single_experiment(
         preprocessor=preprocessor,
+        config=config,
         missingness_rate=miss_rate,
         n_neighbors=k,
         weights=weights,
@@ -192,50 +167,41 @@ def _run_experiment_wrapper(
     return (key, result)
 
 
-def run_all_knn_experiments(
+def run_all_experiments(
+    config: KNNConfig,
     missingness_rates: List[float] = None,
     n_neighbors_list: List[int] = None,
     weights_list: List[str] = None,
     metrics_list: List[str] = None,
     seeds: List[int] = None,
-    quick_test: bool = False,
     parallel: bool = True
 ) -> Dict:
     """
     Run all KNN experiments.
 
     Args:
-        missingness_rates: List of missingness rates
-        n_neighbors_list: List of K values
-        weights_list: List of weighting schemes
-        metrics_list: List of distance metrics
-        seeds: List of random seeds
-        quick_test: If True, run reduced experiments
+        config: KNN configuration object
+        missingness_rates: List of missingness rates (uses config default if None)
+        n_neighbors_list: List of K values (uses config default if None)
+        weights_list: List of weighting schemes (uses config default if None)
+        metrics_list: List of distance metrics (uses config default if None)
+        seeds: List of random seeds (uses config default if None)
         parallel: If True, run experiments in parallel using joblib
 
     Returns:
         Dictionary with all results
     """
-    # Use defaults if not specified
+    # Use defaults from config if not specified
     if missingness_rates is None:
-        missingness_rates = KNNConfig.MISSINGNESS_RATES
+        missingness_rates = config.MISSINGNESS_RATES
     if n_neighbors_list is None:
-        n_neighbors_list = KNNConfig.N_NEIGHBORS
+        n_neighbors_list = config.N_NEIGHBORS
     if weights_list is None:
-        weights_list = KNNConfig.WEIGHTS
+        weights_list = config.WEIGHTS
     if metrics_list is None:
-        metrics_list = KNNConfig.METRICS
+        metrics_list = config.METRICS
     if seeds is None:
-        seeds = KNNConfig.SEEDS
-
-    # Quick test mode
-    if quick_test:
-        print("\n*** QUICK TEST MODE - Running reduced experiments ***\n")
-        missingness_rates = [0.01]
-        n_neighbors_list = [5]
-        weights_list = ['distance']
-        metrics_list = ['euclidean']
-        seeds = [42]
+        seeds = config.SEEDS
 
     # Setup
     print("="*80)
@@ -245,8 +211,8 @@ def run_all_knn_experiments(
     # Load and preprocess data
     print("\nLoading and preprocessing data...")
     preprocessor = FormulationDataPreprocessor(
-        data_path=KNNConfig.DATA_PATH,
-        metadata_cols=KNNConfig.METADATA_COLS
+        data_path=config.DATA_PATH,
+        metadata_cols=config.METADATA_COLS
     )
     preprocessor.load_data()
     preprocessor.normalize_data()
@@ -268,10 +234,10 @@ def run_all_knn_experiments(
     print(f"\n⚡ KNN is fast - no training required! Each run takes seconds.")
 
     # Create output directories
-    os.makedirs(KNNConfig.RESULTS_DIR, exist_ok=True)
-    os.makedirs(KNNConfig.METRICS_DIR, exist_ok=True)
-    os.makedirs(KNNConfig.PREDICTIONS_DIR, exist_ok=True)
-    os.makedirs(KNNConfig.PLOTS_DIR, exist_ok=True)
+    os.makedirs(config.RESULTS_DIR, exist_ok=True)
+    os.makedirs(config.METRICS_DIR, exist_ok=True)
+    os.makedirs(config.PREDICTIONS_DIR, exist_ok=True)
+    os.makedirs(config.PLOTS_DIR, exist_ok=True)
 
     # Run all experiments
     all_results = {}
@@ -282,12 +248,12 @@ def run_all_knn_experiments(
     ))
 
     if parallel and len(experiment_configs) > 1:
-        print(f"\nRunning {len(experiment_configs)} experiments in parallel (n_jobs={KNNConfig.EXPERIMENT_N_JOBS})...")
+        print(f"\nRunning {len(experiment_configs)} experiments in parallel (n_jobs={config.EXPERIMENT_N_JOBS})...")
 
         # Run experiments in parallel
-        results = Parallel(n_jobs=KNNConfig.EXPERIMENT_N_JOBS)(
-            delayed(_run_experiment_wrapper)(config, preprocessor, seeds)
-            for config in tqdm(experiment_configs, desc="Experiments")
+        results = Parallel(n_jobs=config.EXPERIMENT_N_JOBS)(
+            delayed(_run_experiment_wrapper)(exp_config, preprocessor, config, seeds)
+            for exp_config in tqdm(experiment_configs, desc="Experiments")
         )
 
         # Convert list of tuples to dictionary
@@ -298,8 +264,9 @@ def run_all_knn_experiments(
         for experiment_count, (miss_rate, k, weights, metric) in enumerate(experiment_configs, 1):
             print(f"\n[Experiment {experiment_count}/{total_experiments}]")
 
-            result = run_single_knn_experiment(
+            result = run_single_experiment(
                 preprocessor=preprocessor,
+                config=config,
                 missingness_rate=miss_rate,
                 n_neighbors=k,
                 weights=weights,
@@ -314,7 +281,7 @@ def run_all_knn_experiments(
             all_results[key] = result
 
     # Save summary
-    summary_file = os.path.join(KNNConfig.RESULTS_DIR, 'summary.json')
+    summary_file = os.path.join(config.RESULTS_DIR, 'summary.json')
     with open(summary_file, 'w') as f:
         json.dump(all_results, f, indent=2)
     print(f"\nSummary saved to {summary_file}")
@@ -329,80 +296,28 @@ def run_all_knn_experiments(
         miss_results = {k: v for k, v in all_results.items() if f"miss{miss_rate}" in k}
         rankings = compare_knn_configs(miss_results, metric='r2', top_k=3)
 
-        for rank, (config, r2) in enumerate(rankings, 1):
-            print(f"  {rank}. {config}: R² = {r2:.4f}")
+        for rank, (config_name, r2) in enumerate(rankings, 1):
+            print(f"  {rank}. {config_name}: R² = {r2:.4f}")
 
     return all_results
 
 
-def main():
-    """Main entry point."""
-    parser = argparse.ArgumentParser(
-        description='Run KNN imputation experiments for pharmaceutical formulation data'
-    )
-    parser.add_argument(
-        '--quick-test',
-        action='store_true',
-        help='Run quick test with reduced parameters'
-    )
-    parser.add_argument(
-        '--missingness',
-        type=float,
-        nargs='+',
-        default=None,
-        help='Missingness rates to test (e.g., 0.01 0.05 0.10)'
-    )
-    parser.add_argument(
-        '--k-neighbors',
-        type=int,
-        nargs='+',
-        default=None,
-        help='K values to test (e.g., 3 5 10 20 50)'
-    )
-    parser.add_argument(
-        '--weights',
-        type=str,
-        nargs='+',
-        default=None,
-        choices=['uniform', 'distance'],
-        help='Weighting schemes to test'
-    )
-    parser.add_argument(
-        '--metrics',
-        type=str,
-        nargs='+',
-        default=None,
-        choices=['euclidean', 'manhattan', 'cosine'],
-        help='Distance metrics to test'
-    )
-    parser.add_argument(
-        '--seeds',
-        type=int,
-        nargs='+',
-        default=None,
-        help='Random seeds to use (e.g., 42 50 100)'
-    )
+def generate_plots(config: KNNConfig, missingness_rates: List[float] = None):
+    """
+    Generate all KNN visualization plots.
 
-    args = parser.parse_args()
+    Args:
+        config: KNN configuration object
+        missingness_rates: List of missingness rates to plot (uses config default if None)
+    """
+    if missingness_rates is None:
+        missingness_rates = config.MISSINGNESS_RATES
 
-    # Run experiments
-    all_results = run_all_knn_experiments(
-        missingness_rates=args.missingness,
-        n_neighbors_list=args.k_neighbors,
-        weights_list=args.weights,
-        metrics_list=args.metrics,
-        seeds=args.seeds,
-        quick_test=args.quick_test
-    )
-
-    print("\n" + "="*80)
-    print("ALL KNN EXPERIMENTS COMPLETED!")
-    print("="*80)
-    print(f"\nResults saved to: {KNNConfig.RESULTS_DIR}")
-    print("\nTo compare with DAE results, run:")
-    print("  python -c \"from src.compare_methods import generate_all_comparisons; generate_all_comparisons()\"")
-    print("\n" + "="*80)
+    print("\nGenerating KNN plots...")
+    generate_all_knn_plots(config.RESULTS_DIR, missingness_rates)
+    print(f"Plots saved to {config.PLOTS_DIR}")
 
 
 if __name__ == "__main__":
-    main()
+    print("KNN experiment orchestration module.")
+    print("Use run_all_experiments() to execute the full KNN experimental pipeline.")

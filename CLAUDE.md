@@ -10,33 +10,83 @@ Paper: "Machine Learning Recovers Corrupted Pharmaceutical 3D Printing Formulati
 
 ## Key Commands
 
-### Running Experiments
+### Run All Experiments (Recommended)
+
+```bash
+# Quick test of all methods (~10 min total)
+python run_all.py --quick-test
+
+# Full pipeline: DAE + KNN + Baselines + Comparisons
+python run_all.py
+
+# Run all but skip specific methods (if already completed)
+python run_all.py --skip-dae
+python run_all.py --skip-knn --skip-baseline
+
+# Generate comparisons only (requires existing results)
+python run_all.py --comparison-only
+```
+
+### Running DAE Experiments
 
 ```bash
 # Quick test (5 min, recommended first run)
-python main.py --quick-test
+python run_dae.py --quick-test
 
-# Full experiments (~6-8 hours on Apple Silicon, ~24-48h on CPU)
-python main.py
+# Full DAE experiments (~6-8 hours on Apple Silicon, ~24-48h on CPU)
+python run_dae.py
 
 # Custom configurations
-python main.py --missingness 0.01 --learning-rates 0.001 --neuron-sizes 512 --epochs 1000
-python main.py --seeds 1 2 3 4 5
+python run_dae.py --missingness 0.01 --learning-rates 0.001 --neuron-sizes 512 --epochs 1000
+python run_dae.py --seeds 1 2 3 4 5
 
 # Generate plots only (skip training)
-python main.py --skip-training
+python run_dae.py --skip-training
 ```
 
-### Running Individual Modules
+### Running KNN Baseline Experiments
 
-Each module in `src/` can be run independently for testing:
 ```bash
-python src/data_preprocessing.py
-python src/model.py
-python src/train.py
-python src/evaluate.py
-python src/visualize.py
+# Quick test (seconds, no training required)
+python run_knn.py --quick-test
+
+# Full KNN experiments (runs in parallel, ~15-30 min)
+python run_knn.py
+
+# Custom KNN configurations
+python run_knn.py --k-neighbors 5 10 20 --weights uniform distance
+python run_knn.py --metrics euclidean manhattan cosine
+python run_knn.py --missingness 0.01 0.05 0.10
+
+# Run sequentially instead of parallel
+python run_knn.py --no-parallel
 ```
+
+### Running Baseline Experiments
+
+```bash
+# Quick test (naive zero imputation)
+python run_baseline.py --quick-test
+
+# Full baseline experiments
+python run_baseline.py
+
+# Custom configurations
+python run_baseline.py --missingness 0.01 0.05 0.10
+python run_baseline.py --seeds 42 50 100
+```
+
+### Generating Method Comparisons
+
+After running DAE, KNN, and baseline experiments:
+```bash
+python run_comparison.py
+```
+
+This generates:
+- `results/comparisons/method_comparison.png` - R² comparison bar chart
+- `results/comparisons/performance_vs_time.png` - Performance vs. computational time
+- `results/comparisons/comparison_table.txt` - Detailed comparison table
 
 ### Installing Dependencies
 
@@ -46,39 +96,120 @@ pip install -r requirements.txt
 
 ## Architecture & Data Flow
 
-### Pipeline Flow
+### Modular Structure
 
-1. **Data Preprocessing** (`src/data_preprocessing.py`)
+The codebase is organized into functional modules:
+
+```
+src/
+├── common/              # Shared utilities across all methods
+│   ├── data_preprocessing.py    # Data loading, normalization, corruption
+│   └── visualization.py         # Common plotting utilities
+├── dae/                 # Denoising Autoencoder implementation
+│   ├── model.py                 # DAE architecture & device selection
+│   ├── train.py                 # Training loop with masked loss
+│   ├── evaluate.py              # Metrics computation
+│   └── plots.py                 # DAE-specific visualizations
+├── knn/                 # K-Nearest Neighbors baseline
+│   ├── imputation.py            # KNN imputer (sklearn wrapper)
+│   ├── evaluate.py              # KNN metrics & timing
+│   └── plots.py                 # KNN visualizations
+├── baselines/           # Additional baseline methods
+│   ├── zero_imputer.py          # Naive zero-filling baseline
+│   ├── evaluate.py              # Baseline metrics
+│   └── plots.py                 # Baseline visualizations
+└── comparison/          # Cross-method comparison tools
+    └── plots.py                 # DAE vs KNN vs Zero comparison plots
+```
+
+### DAE Pipeline Flow
+
+1. **Data Preprocessing** (`src/common/data_preprocessing.py`)
+   - `FormulationDataPreprocessor` class handles all data operations
    - Loads CSV, extracts ingredient columns (skips 6 metadata columns)
    - Normalizes to [0, 1] using MinMaxScaler
    - Creates corruption: randomly masks values → sets to zero → adds Gaussian noise (σ=0.1)
 
-2. **Model Creation** (`src/model.py`)
-   - DAE architecture: `Input → [FC+BN+LeakyReLU] → [FC+BN+LeakyReLU] → [FC+Sigmoid] → Output`
+2. **Model Creation** (`src/dae/model.py`)
+   - `create_dae()` builds the architecture
+   - DAE structure: `Input → [FC+BN+LeakyReLU] → [FC+BN+LeakyReLU] → [FC+Sigmoid] → Output`
    - Both hidden and latent layers use same neuron count (256/512/1024)
    - Overcomplete architecture (latent_dim = hidden_dim = neuron_size)
+   - `get_device()` automatically selects CUDA > MPS > CPU
 
-3. **Training** (`src/train.py`)
+3. **Training** (`src/dae/train.py`)
+   - `train_dae()` implements training loop
    - Adam optimizer with configurable learning rate
    - **Key:** Loss computed ONLY on masked values (not entire reconstruction)
    - Adds Gaussian noise to inputs during training for denoising
    - Training input: corrupted data + noise → target: original masked values
 
-4. **Evaluation** (`src/evaluate.py`)
+4. **Evaluation** (`src/dae/evaluate.py`)
+   - `evaluate_dae()` computes metrics on test predictions
    - Metrics (R², RMSE, MSE, MAE) computed ONLY on masked values
+   - `aggregate_results()` combines metrics across multiple seeds
    - Saves predictions, targets, and metrics as separate files
 
-5. **Visualization** (`src/visualize.py`)
+5. **Visualization** (`src/dae/plots.py`)
+   - `generate_all_dae_plots()` creates publication-ready figures
    - Loss curves, R² bar charts, predicted vs. truth scatter plots
    - Matches paper figures (Figures 3-7)
 
+### KNN Pipeline Flow
+
+1. **Imputation** (`src/knn/imputation.py`)
+   - `KNNImputer` class wraps sklearn's NearestNeighbors
+   - Configurable: n_neighbors, weights (uniform/distance), metric (euclidean/manhattan/cosine)
+   - No training required - direct imputation based on nearest neighbors
+   - Parallel execution using joblib (n_jobs=-1)
+
+2. **Evaluation** (`src/knn/evaluate.py`)
+   - Same metrics as DAE: R², RMSE, MSE, MAE
+   - Tracks imputation time for performance comparison
+   - `compare_knn_configs()` ranks configurations by performance
+
+3. **Visualization** (`src/knn/plots.py`)
+   - K-neighbor comparison plots
+   - Weights/metric comparison visualizations
+
 ### Orchestration
 
-`main.py` orchestrates the full pipeline:
-- `ExperimentConfig` class centralizes all hyperparameters
-- `run_single_experiment()` runs one config across multiple seeds
+**Entry Points:**
+- `run_all.py` - Master orchestrator for all experiments
+- `run_dae.py` - DAE experiments entry point
+- `run_knn.py` - KNN experiments entry point
+- `run_baseline.py` - Baseline experiments entry point
+- `run_comparison.py` - Comparison generation entry point
+
+**Configuration** (`src/config.py`):
+- `DAEConfig` - DAE hyperparameters and paths
+- `KNNConfig` - KNN parameters and paths
+- `BaselineConfig` - Baseline parameters and paths
+- `ComparisonConfig` - Comparison paths
+- `get_config()` - Factory function for quick-test mode
+
+**DAE Pipeline** (`src/dae/experiments.py`):
 - `run_all_experiments()` uses `itertools.product()` to test all combinations
-- Results saved to `results/models/`, `results/metrics/`, `results/plots/`
+- `run_single_experiment()` runs one config across multiple seeds
+- `generate_plots()` creates DAE visualizations
+- Results saved to `results/dae/{models,metrics,plots}/`
+
+**KNN Pipeline** (`src/knn/experiments.py`):
+- `run_all_experiments()` supports parallel execution (12 experiments concurrently)
+- `_run_experiment_wrapper()` enables joblib parallelization
+- `generate_plots()` creates KNN visualizations
+- Results saved to `results/knn/{metrics,predictions,plots}/`
+
+**Baseline Pipeline** (`src/baselines/experiments.py`):
+- `run_all_experiments()` runs zero imputation baseline
+- `generate_plots()` creates baseline visualizations
+- Results saved to `results/baselines/{metrics,predictions,plots}/`
+
+**Comparison Pipeline** (`run_comparison.py`):
+- `generate_all_comparisons()` creates cross-method comparisons
+- Loads results from `results/{dae,knn,baselines}/summary.json`
+- Generates bar charts, scatter plots, and text tables
+- Results saved to `results/comparisons/`
 
 ## Critical Architecture Details
 
@@ -98,50 +229,95 @@ Priority order: CUDA > MPS (Apple Silicon) > CPU
 - MPS support requires macOS 12.3+ and PyTorch 2.0+
 
 ### Filename Convention
-Models/metrics follow pattern: `miss{rate}_lr{lr}_n{neurons}_ep{epochs}_seed{seed}.{ext}`
+
+**DAE files** follow pattern: `miss{rate}_lr{lr}_n{neurons}_ep{epochs}_seed{seed}.{ext}`
 - Example: `miss0.01_lr0.001_n512_ep1000_seed42.pt`
+
+**KNN files** follow pattern: `miss{rate}_k{neighbors}_{weights}_{metric}_seed{seed}.{ext}`
+- Example: `miss0.01_k5_distance_euclidean_seed42.npz`
 
 ## Key Experimental Variables
 
-From `ExperimentConfig` in main.py:76-107:
-- **Missingness rates:** 1%, 5%, 10% (what percentage of data to corrupt)
+### DAE Configuration (from `ExperimentConfig` in main.py:23-43)
+- **Missingness rates:** 1%, 5%, 10% (percentage of data to corrupt)
 - **Learning rates:** 10⁻¹, 10⁻³, 10⁻⁵ (paper shows 10⁻³ is optimal)
 - **Neuron sizes:** 256, 512, 1024 (both hidden and latent layers)
 - **Epochs:** 100, 500, 1000, 1200
 - **Seeds:** 42, 50, 100 (for statistical robustness)
-- **Total:** 243 experiments (3×3×3×3 configs × 3 seeds)
+- **Total:** 243 experiments (3×3×3×4 configs × 3 seeds)
+
+### KNN Configuration (from `KNNConfig` in knn_main.py:29-54)
+- **Missingness rates:** 1%, 5%, 10% (same as DAE)
+- **N-neighbors:** 3, 5, 10, 20, 50
+- **Weights:** uniform, distance
+- **Metrics:** euclidean, manhattan, cosine
+- **Seeds:** 42, 50, 100 (matches DAE for fair comparison)
+- **Parallelization:** 12 concurrent experiments, all CPU cores for nearest neighbor search
+- **Total:** 90 experiments (3×5×2×3 configs × 3 seeds)
 
 ## Results Structure
 
 ```
 results/
-├── models/           # Trained model checkpoints (.pt)
-├── metrics/          # Metrics JSON + predictions NPZ
-│   ├── *_loss.json        # Loss history per epoch
-│   ├── *_metrics.json     # Aggregated R²/RMSE stats
-│   └── *_predictions.npz  # Predictions + targets arrays
-├── plots/            # Publication-ready figures
-│   ├── loss_curves_*.png
-│   ├── r2_bars_*.png
-│   └── pred_vs_truth_*.png
-└── summary.json      # All experiment results
+├── dae/                          # DAE experiment outputs
+│   ├── models/                   # Trained model checkpoints (.pt)
+│   ├── metrics/                  # Metrics JSON + predictions NPZ
+│   │   ├── *_loss.json           # Loss history per epoch
+│   │   ├── *_metrics.json        # Aggregated R²/RMSE stats
+│   │   └── *_predictions.npz     # Predictions + targets arrays
+│   ├── plots/                    # DAE-specific figures
+│   │   ├── loss_curves_*.png
+│   │   ├── r2_bars_*.png
+│   │   └── pred_vs_truth_*.png
+│   └── summary.json              # All DAE experiment results
+├── knn/                          # KNN experiment outputs
+│   ├── metrics/                  # KNN metrics JSON
+│   │   └── *_metrics.json        # R²/RMSE + imputation time
+│   ├── predictions/              # KNN predictions NPZ
+│   │   └── *_predictions.npz     # Predictions + targets arrays
+│   ├── plots/                    # KNN-specific figures
+│   │   ├── k_comparison_*.png
+│   │   └── weights_comparison_*.png
+│   └── summary.json              # All KNN experiment results
+├── baselines/                    # Baseline method outputs
+│   ├── metrics/
+│   ├── predictions/
+│   ├── plots/
+│   └── summary.json
+└── comparisons/                  # Cross-method comparison outputs
+    ├── method_comparison.png     # R² bars: DAE vs KNN vs Zero
+    ├── performance_vs_time.png   # Performance vs. computation scatter
+    └── comparison_table.txt      # Detailed comparison table
 ```
 
 ## Important Implementation Notes
 
-### Training Details
+### DAE Training Details
 - Batch training NOT used - entire dataset processed at once (1570+ samples fits in memory)
 - Noise is added during both training AND evaluation for consistency
 - Model saved after training completes (not during training)
+- Uses PyTorch tensors throughout the pipeline
+
+### KNN Implementation Details
+- No training phase - KNN is a lazy learning method
+- Uses numpy arrays (converted from PyTorch tensors)
+- Parallel execution at two levels:
+  1. **Experiment-level:** 12 experiments run concurrently via joblib
+  2. **Neighbor search:** All CPU cores used for NearestNeighbors (n_jobs=-1)
+- Much faster than DAE (~15-30 min for all 90 experiments vs. ~6-8 hours for DAE)
+- Imputation time tracked for performance comparison
 
 ### Data Sparsity Handling
 - Dataset is ~99% sparse (zeros for unused ingredients)
 - Normalization preserves zeros (MinMaxScaler fits on entire range including zeros)
-- Model must learn to distinguish between "unused ingredient" (original zero) and "missing value" (masked non-zero)
+- Both DAE and KNN must distinguish between "unused ingredient" (original zero) and "missing value" (masked non-zero)
+- KNN handles sparsity naturally through distance metrics
+- DAE learns sparsity pattern through training
 
 ### Reproducibility
-- Fixed seeds (42, 50, 100) used for data splitting and corruption
-- Seeds control: data corruption mask creation, noise generation, model initialization
+- Fixed seeds (42, 50, 100) used for data corruption across ALL methods (DAE, KNN, baselines)
+- Seeds control: data corruption mask creation, noise generation, model initialization (DAE only)
+- Same corrupted data used for fair comparison between methods
 - Results aggregated across seeds with mean ± std reported
 
 ## Data Requirements
@@ -152,8 +328,17 @@ results/
 
 ## Paper Findings (for context)
 
+### DAE Performance
 - **1% missing:** R²=0.94±0.03 (1024 neurons, 1200 epochs, LR=10⁻³)
 - **5% missing:** R²=0.48±0.09 (256 neurons, lower epochs, LR=10⁻³)
 - **10% missing:** R²=0.37±0.05 (256 neurons, lower epochs, LR=10⁻³)
 - **Key insight:** Learning rate has strongest effect; 10⁻³ performs best across all missingness levels
 - **Capacity tradeoff:** Larger models (1024) better for low missingness; smaller models (256) generalize better at high missingness
+
+### Method Comparison
+The codebase now supports comprehensive comparison between:
+- **DAE:** Neural network approach with denoising
+- **KNN:** Classical ML baseline (no training)
+- **Zero imputation:** Naive baseline (fill with zeros)
+
+Use `generate_all_comparisons()` to create side-by-side performance comparisons after running experiments.
