@@ -1,0 +1,982 @@
+================================================================================
+KNN IMPUTATION FOR PHARMACEUTICAL FORMULATION DATA
+================================================================================
+
+Loading and preprocessing data...
+Loading data from data/material_name_smilesRemoved.csv...
+Found 13,282 NaN values, filling with 0
+Loaded 1571 formulations with 336 ingredients
+Total data points: 527,856
+Sparsity: 98.94% zeros, 1.06% non-zeros
+Normalizing data to [0, 1] range...
+
+Dataset Statistics:
+  Formulations: 1,571
+  Ingredients: 336
+  Total data points: 527,856
+  Sparsity: 98.94% zeros
+
+Total experiments to run: 90
+Seeds per experiment: 3
+Total imputation runs: 270
+
+⚡ KNN is fast - no training required! Each run takes seconds.
+
+Running 90 experiments in parallel (n_jobs=12)...
+Experiments:   0%|          | 0/90 [00:00<?, ?it/s]/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+/Users/yusuf/Library/CloudStorage/OneDrive-QueenMary,UniversityofLondon/deepceutix/ollima/src/data_preprocessing.py:200: UserWarning: The given NumPy array is not writable, and PyTorch does not support non-writable tensors. This means writing to this tensor will result in undefined behavior. You may want to copy the array to protect its data or make it writable before converting it to a tensor. This type of warning will be suppressed for the rest of this program. (Triggered internally at /Users/runner/work/pytorch/pytorch/pytorch/torch/csrc/utils/tensor_numpy.cpp:209.)
+  original_tensor = torch.FloatTensor(self.scaled_data)
+Experiments:  27%|██▋       | 24/90 [00:02<00:06, 10.04it/s]Experiments:  40%|████      | 36/90 [00:03<00:04, 12.49it/s]Experiments:  53%|█████▎    | 48/90 [00:04<00:03, 11.09it/s]Experiments:  67%|██████▋   | 60/90 [00:05<00:02, 10.45it/s]Experiments:  80%|████████  | 72/90 [00:07<00:01,  9.42it/s]Experiments:  93%|█████████▎| 84/90 [00:09<00:00,  7.98it/s]Experiments: 100%|██████████| 90/90 [00:09<00:00,  9.89it/s]
+
+Summary saved to knn_results/summary.json
+
+================================================================================
+BEST CONFIGURATIONS BY MISSINGNESS RATE
+================================================================================
+
+1% Missingness:
+  1. miss0.01_k20_distance_cosine: R² = -0.2294
+  2. miss0.01_k20_uniform_cosine: R² = -0.2371
+  3. miss0.01_k50_distance_cosine: R² = -0.2572
+
+5% Missingness:
+  1. miss0.05_k20_distance_cosine: R² = -0.2988
+  2. miss0.05_k20_uniform_cosine: R² = -0.3093
+  3. miss0.05_k10_distance_cosine: R² = -0.3253
+
+10% Missingness:
+  1. miss0.1_k20_distance_cosine: R² = -0.3118
+  2. miss0.1_k20_uniform_cosine: R² = -0.3212
+  3. miss0.1_k50_distance_cosine: R² = -0.3340
+
+================================================================================
+ALL KNN EXPERIMENTS COMPLETED!
+================================================================================
+
+Results saved to: knn_results
+
+To compare with DAE results, run:
+  python -c "from src.compare_methods import generate_all_comparisons; generate_all_comparisons()"
+
+================================================================================
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_uniform_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_distance_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_uniform_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_uniform_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_distance_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_distance_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_uniform_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_distance_manhattan_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_distance_manhattan_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_distance_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_uniform_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_uniform_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_distance_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_uniform_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_distance_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_distance_manhattan_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_distance_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_distance_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_uniform_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_distance_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_distance_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_distance_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_uniform_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_uniform_manhattan_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_distance_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_uniform_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_uniform_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_uniform_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_uniform_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_uniform_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_distance_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_distance_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_distance_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_distance_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_distance_manhattan_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k50_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k3_distance_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_distance_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k20_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_uniform_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_distance_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_uniform_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k20_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k3_distance_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k3_distance_cosine_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k10_distance_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k20_distance_euclidean_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_distance_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_uniform_manhattan_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_uniform_euclidean_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k5_uniform_cosine_metrics.json
+
+Preparing data with 1.0% missingness (seed=42)...
+Masked 5,350 values (1.01%)
+
+Preparing data with 1.0% missingness (seed=50)...
+Masked 5,259 values (1.00%)
+
+Preparing data with 1.0% missingness (seed=100)...
+Masked 5,334 values (1.01%)
+Metrics saved to knn_results/metrics/miss0.01_k10_distance_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k5_uniform_manhattan_metrics.json
+
+Preparing data with 5.0% missingness (seed=42)...
+Masked 26,243 values (4.97%)
+
+Preparing data with 5.0% missingness (seed=50)...
+Masked 26,460 values (5.01%)
+
+Preparing data with 5.0% missingness (seed=100)...
+Masked 26,133 values (4.95%)
+Metrics saved to knn_results/metrics/miss0.05_k50_distance_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k5_uniform_euclidean_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k10_uniform_cosine_metrics.json
+
+Preparing data with 10.0% missingness (seed=42)...
+Masked 52,614 values (9.97%)
+
+Preparing data with 10.0% missingness (seed=50)...
+Masked 52,873 values (10.02%)
+
+Preparing data with 10.0% missingness (seed=100)...
+Masked 52,602 values (9.97%)
+Metrics saved to knn_results/metrics/miss0.1_k50_uniform_manhattan_metrics.json

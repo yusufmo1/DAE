@@ -183,33 +183,6 @@ def create_dae(
     return model
 
 
-def main():
-    """Example usage of the DAE model."""
-    # Test on different neuron sizes
-    input_dim = 382  # Number of ingredients in the dataset
-
-    for neuron_size in [256, 512, 1024]:
-        print(f"\n{'='*60}")
-        print(f"Testing with {neuron_size} neurons")
-        print(f"{'='*60}")
-
-        model = create_dae(input_dim, neuron_size)
-
-        # Test forward pass
-        batch_size = 32
-        x = torch.randn(batch_size, input_dim)
-
-        device = get_device()
-        x = x.to(device)
-
-        with torch.no_grad():
-            latent, reconstructed = model(x)
-
-        print(f"\nForward pass test:")
-        print(f"  Input shape: {x.shape}")
-        print(f"  Latent shape: {latent.shape}")
-        print(f"  Reconstructed shape: {reconstructed.shape}")
-
-
 if __name__ == "__main__":
-    main()
+    print("This module provides DAE model architecture.")
+    print("Use main.py to run experiments.")

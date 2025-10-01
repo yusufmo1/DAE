@@ -21,7 +21,7 @@ class FormulationDataPreprocessor:
     - ~99% of values are zeros (unused ingredients)
     """
 
-    def __init__(self, data_path: str, metadata_cols: int = 6):
+    def __init__(self, data_path: str, metadata_cols: int = 6, ingredient_end_col: int = 342):
         """
         Initialize the preprocessor.
 
@@ -29,9 +29,12 @@ class FormulationDataPreprocessor:
             data_path: Path to the CSV file containing formulation data
             metadata_cols: Number of metadata columns to exclude (default: 6)
                           These are: id, article, author, formulation_id, operator, reviewer
+            ingredient_end_col: Column index where ingredients end (default: 342)
+                              Columns 6-341 are the 336 ingredient columns
         """
         self.data_path = data_path
         self.metadata_cols = metadata_cols
+        self.ingredient_end_col = ingredient_end_col
         self.scaler = MinMaxScaler(feature_range=(0, 1))
         self.data = None
         self.scaled_data = None
@@ -40,6 +43,7 @@ class FormulationDataPreprocessor:
     def load_data(self) -> pd.DataFrame:
         """
         Load formulation data from CSV and extract ingredient columns.
+        Excludes Sulfasalazine column as per requirements.
 
         Returns:
             DataFrame with only ingredient composition columns
@@ -47,8 +51,20 @@ class FormulationDataPreprocessor:
         print(f"Loading data from {self.data_path}...")
         df = pd.read_csv(self.data_path)
 
-        # Extract only ingredient columns (remove metadata)
-        self.data = df.iloc[:, self.metadata_cols:]
+        # Extract only ingredient columns (columns 6 to 341, excluding process parameters)
+        self.data = df.iloc[:, self.metadata_cols:self.ingredient_end_col]
+
+        # Handle NaN values - fill with 0 (ingredient not used)
+        nan_count = self.data.isna().sum().sum()
+        if nan_count > 0:
+            print(f"Found {nan_count:,} NaN values, filling with 0")
+            self.data = self.data.fillna(0)
+
+        # Remove Sulfasalazine column if present (as per user requirements)
+        if 'Sulfasalazine' in self.data.columns:
+            print("Excluding Sulfasalazine column as per requirements")
+            self.data = self.data.drop(columns=['Sulfasalazine'])
+
         self.ingredient_names = self.data.columns.tolist()
 
         print(f"Loaded {len(self.data)} formulations with {len(self.ingredient_names)} ingredients")
@@ -216,37 +232,6 @@ class FormulationDataPreprocessor:
         return stats
 
 
-def main():
-    """Example usage of the preprocessor."""
-    preprocessor = FormulationDataPreprocessor(
-        data_path='data/material_name_smilesRemoved.csv'
-    )
-
-    # Load and normalize data
-    preprocessor.load_data()
-    preprocessor.normalize_data()
-
-    # Print statistics
-    stats = preprocessor.get_data_statistics()
-    print("\nDataset Statistics:")
-    for key, value in stats.items():
-        if isinstance(value, float):
-            print(f"  {key}: {value:.2f}")
-        else:
-            print(f"  {key}: {value:,}")
-
-    # Prepare corrupted data for 1% missingness
-    original, corrupted, mask = preprocessor.prepare_data(
-        missingness_rate=0.01,
-        seed=42
-    )
-
-    print(f"\nTensor shapes:")
-    print(f"  Original: {original.shape}")
-    print(f"  Corrupted: {corrupted.shape}")
-    print(f"  Mask: {mask.shape}")
-    print(f"  Masked values: {mask.sum()}")
-
-
 if __name__ == "__main__":
-    main()
+    print("This module provides data preprocessing utilities.")
+    print("Use main.py to run experiments.")

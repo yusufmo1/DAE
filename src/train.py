@@ -136,6 +136,10 @@ class DAETrainer:
         # Backward pass
         self.optimizer.zero_grad()
         loss.backward()
+
+        # Clip gradients to prevent explosion
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
+
         self.optimizer.step()
 
         return loss.item()
@@ -330,41 +334,6 @@ def train_dae(
     return model, loss_history
 
 
-def main():
-    """Example usage of the trainer."""
-    from model import create_dae, get_device
-
-    # Setup
-    device = get_device()
-    input_dim = 382
-    batch_size = 32
-
-    # Create dummy data
-    original_data = torch.rand(batch_size, input_dim)
-    corrupted_data = original_data.clone()
-    mask = torch.rand(batch_size, input_dim) < 0.01  # 1% missing
-
-    corrupted_data[mask] = 0
-
-    # Create model
-    model = create_dae(input_dim=input_dim, neuron_size=256, device=device)
-
-    # Train
-    print("\nTraining DAE...")
-    trained_model, loss_history = train_dae(
-        model=model,
-        original_data=original_data,
-        corrupted_data=corrupted_data,
-        mask=mask,
-        device=device,
-        learning_rate=1e-3,
-        num_epochs=100,
-        verbose=True
-    )
-
-    print(f"\nTraining complete!")
-    print(f"Final loss: {loss_history[-1]:.6f}")
-
-
 if __name__ == "__main__":
-    main()
+    print("This module provides DAE training utilities.")
+    print("Use main.py to run experiments.")
