@@ -41,9 +41,11 @@ def plot_knn_r2_bars(
     metrics = ['euclidean', 'manhattan', 'cosine']
     metric_labels = ['Euclidean', 'Manhattan', 'Cosine']
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
+    # Use 2x2 layout with legend in bottom-right
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     fig.suptitle(f'KNN R² Scores - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
+    axes = axes.flatten()
 
     k_values = [3, 5, 10, 20, 50]
     colors = {'uniform': '#1f77b4', 'distance': '#ff7f0e'}
@@ -89,13 +91,22 @@ def plot_knn_r2_bars(
                label='Distance', capsize=5, color=colors['distance'], alpha=0.8)
 
         ax.set_xlabel('K (Neighbors)', fontweight='bold')
-        ax.set_ylabel('R² Score' if idx == 0 else '', fontweight='bold')
+        ax.set_ylabel('R² Score' if idx % 2 == 0 else '', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) {label} Distance', fontweight='bold', loc='left')
         ax.set_xticks(x)
         ax.set_xticklabels([str(k) for k in k_values])
-        ax.legend(loc='best')
         ax.grid(True, alpha=0.3, axis='y')
         ax.axhline(y=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
+
+    # Add shared legend in bottom-right subplot
+    axes[3].axis('off')
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor=colors['uniform'], alpha=0.8, label='Uniform Weighting'),
+        Patch(facecolor=colors['distance'], alpha=0.8, label='Distance Weighting')
+    ]
+    axes[3].legend(handles=legend_elements, loc='center', fontsize=11,
+                  frameon=True, fancybox=True, shadow=True)
 
     plt.tight_layout()
 

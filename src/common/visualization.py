@@ -152,7 +152,8 @@ def plot_multi_predictions_vs_truth(
     overall_title: str,
     subplot_titles: List[str],
     save_path: Optional[str] = None,
-    show: bool = True
+    show: bool = True,
+    use_shared_legend: bool = True
 ):
     """
     Create a grid of prediction vs truth plots for multiple methods/configs.
@@ -164,17 +165,24 @@ def plot_multi_predictions_vs_truth(
         subplot_titles: List of subplot titles
         save_path: Path to save figure
         show: Whether to display the plot
+        use_shared_legend: If True, use 2x2 grid with shared legend in bottom-right
     """
     num_plots = len(predictions_dict)
-    num_rows = (num_plots + num_cols - 1) // num_cols
 
-    fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 5 * num_rows))
-    fig.suptitle(overall_title, fontsize=14, fontweight='bold')
-
-    if num_plots == 1:
-        axes = [axes]
-    else:
+    # Use 2x2 layout with shared legend in bottom-right if requested
+    if use_shared_legend and num_plots == 3:
+        num_rows, num_cols = 2, 2
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(10, 10))
         axes = axes.flatten()
+    else:
+        num_rows = (num_plots + num_cols - 1) // num_cols
+        fig, axes = plt.subplots(num_rows, num_cols, figsize=(5 * num_cols, 5 * num_rows))
+        if num_plots == 1:
+            axes = [axes]
+        else:
+            axes = axes.flatten()
+
+    fig.suptitle(overall_title, fontsize=14, fontweight='bold')
 
     for idx, (method, data) in enumerate(predictions_dict.items()):
         ax = axes[idx]
@@ -182,14 +190,16 @@ def plot_multi_predictions_vs_truth(
         targets = data['targets']
 
         # Scatter plot
-        ax.scatter(targets, predictions, alpha=0.5, s=20,
-                   color='#1f77b4', edgecolors='none')
+        ax.scatter(targets, predictions, alpha=0.6, s=30,
+                   color='#1f77b4', edgecolors='none',
+                   label='Individual Predictions')
 
         # Perfect prediction line
         min_val = min(targets.min(), predictions.min())
         max_val = max(targets.max(), predictions.max())
         ax.plot([min_val, max_val], [min_val, max_val],
-                'k--', linewidth=1.5, alpha=0.7)
+                'k--', linewidth=1.5, alpha=0.7,
+                label='Ideal Predictions')
 
         # Add R²
         from sklearn.metrics import r2_score
@@ -205,12 +215,36 @@ def plot_multi_predictions_vs_truth(
                      fontweight='bold', loc='left')
         ax.set_xlim(0, 1)
         ax.set_ylim(0, 1)
+
+        # Only add legend to individual plots if not using shared legend
+        if not use_shared_legend:
+            ax.legend(loc='upper left', fontsize=9)
+
         ax.grid(True, alpha=0.3)
         ax.set_aspect('equal')
 
-    # Hide extra subplots
-    for idx in range(num_plots, len(axes)):
-        axes[idx].set_visible(False)
+    # Handle shared legend in bottom-right subplot for 2x2 layout
+    if use_shared_legend and num_plots == 3 and len(axes) == 4:
+        # Turn off the bottom-right subplot and use it for legend
+        axes[3].axis('off')
+
+        # Create legend handles manually
+        from matplotlib.lines import Line2D
+        from matplotlib.patches import Patch
+
+        legend_elements = [
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#1f77b4',
+                   markersize=8, alpha=0.6, label='Individual Predictions'),
+            Line2D([0], [0], color='black', linestyle='--', linewidth=1.5,
+                   alpha=0.7, label='Ideal Predictions')
+        ]
+
+        axes[3].legend(handles=legend_elements, loc='center', fontsize=11,
+                      frameon=True, fancybox=True, shadow=True)
+    else:
+        # Hide extra subplots
+        for idx in range(num_plots, len(axes)):
+            axes[idx].set_visible(False)
 
     plt.tight_layout()
 

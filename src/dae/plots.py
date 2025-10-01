@@ -39,11 +39,13 @@ def plot_dae_loss_curves(
         show: Whether to display the plot
     """
     learning_rates = [1e-1, 1e-3, 1e-5]
-    lr_labels = ['10⁻¹', '10⁻³', '10⁻⁵']
+    lr_labels = [r'$10^{-1}$', r'$10^{-3}$', r'$10^{-5}$']
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'DAE Loss Curves - {missingness_rate*100:.0f}% Missing Data',
+    # Use 2x2 layout with legend in bottom-right
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig.suptitle(f'Loss Curves - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
+    axes = axes.flatten()
 
     colors = {256: '#1f77b4', 512: '#ff7f0e', 1024: '#2ca02c'}
     neuron_sizes = [256, 512, 1024]
@@ -69,10 +71,9 @@ def plot_dae_loss_curves(
                            alpha=0.8)
 
         ax.set_xlabel('Epochs', fontweight='bold')
-        ax.set_ylabel('Loss' if idx == 0 else '', fontweight='bold')
+        ax.set_ylabel('Loss' if idx % 2 == 0 else '', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) LR={lr_label}',
                     fontweight='bold', loc='left')
-        ax.legend(loc='best', fontsize=9)
         ax.grid(True, alpha=0.3)
 
         # Set y-axis limits based on data
@@ -87,6 +88,17 @@ def plot_dae_loss_curves(
                 y_max = max(all_losses)
                 margin = (y_max - y_min) * 0.1
                 ax.set_ylim(y_min - margin, y_max + margin)
+
+    # Add shared legend in bottom-right subplot
+    axes[3].axis('off')
+    from matplotlib.lines import Line2D
+    legend_elements = [
+        Line2D([0], [0], color=colors[256], linewidth=1.5, alpha=0.8, label='256 neurons'),
+        Line2D([0], [0], color=colors[512], linewidth=1.5, alpha=0.8, label='512 neurons'),
+        Line2D([0], [0], color=colors[1024], linewidth=1.5, alpha=0.8, label='1024 neurons')
+    ]
+    axes[3].legend(handles=legend_elements, loc='center', fontsize=11,
+                  frameon=True, fancybox=True, shadow=True)
 
     plt.tight_layout()
 
@@ -118,16 +130,18 @@ def plot_dae_r2_bars(
         show: Whether to display the plot
     """
     learning_rates = [1e-1, 1e-3, 1e-5]
-    lr_labels = ['10⁻¹', '10⁻³', '10⁻⁵']
+    lr_labels = [r'$10^{-1}$', r'$10^{-3}$', r'$10^{-5}$']
     neuron_sizes = [256, 512, 1024]
     epoch_list = [100, 500, 1000, 1200]
 
-    fig, axes = plt.subplots(1, 3, figsize=(15, 4))
-    fig.suptitle(f'DAE R² Scores - {missingness_rate*100:.0f}% Missing Data',
+    # Use 2x2 layout with legend in bottom-right
+    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
+    fig.suptitle(f'R² Scores - {missingness_rate*100:.0f}% Missing Data',
                  fontsize=14, fontweight='bold')
+    axes = axes.flatten()
 
-    # Colors for different epochs
-    colors = ['#1f77b4', '#ff7f0e', '#d62728', '#17becf']
+    # Colors for different epochs (matching paper: blue, red, pink, cyan)
+    colors = ['#1f77b4', '#d62728', '#ff69b4', '#17becf']
     bar_width = 0.2
     x_pos = np.arange(len(neuron_sizes))
 
@@ -156,13 +170,24 @@ def plot_dae_r2_bars(
                       alpha=0.8)
 
         ax.set_xlabel('Neurone size', fontweight='bold')
-        ax.set_ylabel('R²' if idx == 0 else '', fontweight='bold')
+        ax.set_ylabel('R²' if idx % 2 == 0 else '', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) LR={lr_label}', fontweight='bold', loc='left')
         ax.set_xticks(x_pos)
         ax.set_xticklabels(neuron_sizes)
-        ax.legend(loc='best', fontsize=9)
         ax.grid(True, alpha=0.3, axis='y')
         ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.5)
+
+    # Add shared legend in bottom-right subplot
+    axes[3].axis('off')
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor=colors[0], alpha=0.8, label='100 epochs'),
+        Patch(facecolor=colors[1], alpha=0.8, label='500 epochs'),
+        Patch(facecolor=colors[2], alpha=0.8, label='1000 epochs'),
+        Patch(facecolor=colors[3], alpha=0.8, label='1200 epochs')
+    ]
+    axes[3].legend(handles=legend_elements, loc='center', fontsize=11,
+                  frameon=True, fancybox=True, shadow=True)
 
     plt.tight_layout()
 
@@ -194,7 +219,7 @@ def plot_dae_predictions_vs_truth(
         show: Whether to display the plot
     """
     learning_rates = [1e-1, 1e-3, 1e-5]
-    lr_labels = ['10⁻¹', '10⁻³', '10⁻⁵']
+    lr_labels = [r'$10^{-1}$', r'$10^{-3}$', r'$10^{-5}$']
 
     subplot_titles = [f'({chr(65+idx)}) LR={lr_label}'
                       for idx, lr_label in enumerate(lr_labels)]
