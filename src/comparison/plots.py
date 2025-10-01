@@ -160,7 +160,7 @@ def plot_performance_vs_time(
         save_path: Path to save figure
         show: Whether to display plot
     """
-    fig, axes = plt.subplots(1, 3, figsize=(12, 3.5))
+    fig, axes = plt.subplots(2, 2, figsize=(10, 8))
     fig.suptitle('Performance vs. Computational Time Trade-off', fontweight='bold', fontsize=14)
 
     missingness_rates = [0.01, 0.05, 0.10]
@@ -181,8 +181,11 @@ def plot_performance_vs_time(
         'Median': 'D'
     }
 
+    # Plot positions: (0,0), (0,1), (1,0), legend at (1,1)
+    positions = [(0, 0), (0, 1), (1, 0)]
+
     for idx, miss_rate in enumerate(missingness_rates):
-        ax = axes[idx]
+        ax = axes[positions[idx]]
 
         # Plot each method
         for method_name, results in method_results.items():
@@ -192,12 +195,8 @@ def plot_performance_vs_time(
             for config, metrics in results.items():
                 if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
                     r2_values.append(metrics['r2_mean'])
-
-                    # Get time - DAE uses placeholder, others use actual time
-                    if method_name == 'DAE':
-                        time_values.append(100)  # Placeholder
-                    else:
-                        time_values.append(metrics.get('imputation_time_mean', 0.001))
+                    # Get imputation time (all methods now have this)
+                    time_values.append(metrics.get('imputation_time_mean', 0.001))
 
             if r2_values:
                 color = color_map.get(method_name, f'C{list(method_results.keys()).index(method_name)}')
@@ -207,11 +206,30 @@ def plot_performance_vs_time(
                           color=color, marker=marker, label=method_name)
 
         ax.set_xlabel('Time (log scale)', fontweight='bold')
-        ax.set_ylabel(r'$R^2$ Score' if idx == 0 else '', fontweight='bold')
+        # Y-axis label only on left column
+        if positions[idx][1] == 0:
+            ax.set_ylabel(r'$R^2$ Score', fontweight='bold')
         ax.set_title(f'({chr(65+idx)}) {miss_rate*100:.0f}% Missing', fontweight='bold', loc='left')
         ax.set_xscale('log')
-        ax.legend(loc='best')
         ax.grid(True, alpha=0.3)
+
+    # Bottom right subplot for legend
+    ax_legend = axes[1, 1]
+    ax_legend.axis('off')
+
+    # Create legend entries
+    handles = []
+    labels = []
+    for method_name in method_results.keys():
+        color = color_map.get(method_name, 'gray')
+        marker = marker_map.get(method_name, 'o')
+        size = 100 if method_name in ['Zero', 'Mean', 'Median'] else 50
+        handle = plt.scatter([], [], s=size, alpha=0.6 if method_name in ['DAE', 'KNN'] else 0.8,
+                           color=color, marker=marker)
+        handles.append(handle)
+        labels.append(method_name)
+
+    ax_legend.legend(handles, labels, loc='center', fontsize=12, frameon=True)
 
     plt.tight_layout()
 

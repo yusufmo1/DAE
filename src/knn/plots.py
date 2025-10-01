@@ -47,7 +47,7 @@ def plot_knn_r2_bars(
                  fontsize=14, fontweight='bold')
     axes = axes.flatten()
 
-    k_values = [3, 5, 10, 20, 50]
+    k_values = [3, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400]
     colors = {'uniform': '#1f77b4', 'distance': '#ff7f0e'}
     x = np.arange(len(k_values))
     width = 0.35
@@ -179,7 +179,7 @@ def plot_knn_performance_summary(
     metrics = ['euclidean', 'manhattan', 'cosine']
     metric_labels = ['Euclidean', 'Manhattan', 'Cosine']
     colors = {'euclidean': '#1f77b4', 'manhattan': '#ff7f0e', 'cosine': '#2ca02c'}
-    k_values = [3, 5, 10, 20, 50]
+    k_values = [3, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400]
 
     # Plot 1: R² vs K (distance-weighted)
     for metric, label in zip(metrics, metric_labels):
@@ -200,7 +200,6 @@ def plot_knn_performance_summary(
     ax1.legend(loc='best')
     ax1.grid(True, alpha=0.3)
     ax1.axhline(y=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
-    ax1.set_xscale('log')
 
     # Plot 2: Imputation time vs K
     for metric, label in zip(metrics, metric_labels):
@@ -220,7 +219,6 @@ def plot_knn_performance_summary(
     ax2.set_title('(B) Computational Cost vs K', fontweight='bold', loc='left')
     ax2.legend(loc='best')
     ax2.grid(True, alpha=0.3)
-    ax2.set_xscale('log')
 
     plt.tight_layout()
 
@@ -254,7 +252,7 @@ def load_knn_results_for_plots(
     predictions_data = {}
 
     metrics_list = ['euclidean', 'manhattan', 'cosine']
-    k_values = [3, 5, 10, 20, 50]
+    k_values = [3, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400]
     weights_list = ['uniform', 'distance']
 
     # Load R² and time data

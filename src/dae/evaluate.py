@@ -9,6 +9,7 @@ from typing import Tuple, Dict
 from sklearn.metrics import r2_score, mean_squared_error
 import json
 import os
+import time
 
 
 class DAEEvaluator:
@@ -120,11 +121,16 @@ class DAEEvaluator:
         Returns:
             Tuple of (predictions, metrics_dict)
         """
-        # Get predictions
+        # Get predictions and measure imputation time
+        start_time = time.time()
         predictions = self.get_predictions(corrupted_data, noise_std)
+        imputation_time = time.time() - start_time
 
         # Compute metrics
         metrics = self.compute_metrics(predictions, original_data, mask)
+
+        # Add imputation time to metrics
+        metrics['imputation_time'] = imputation_time
 
         return predictions, metrics
 
@@ -268,7 +274,7 @@ def aggregate_results(results_list: list, seeds: list) -> Dict:
     }
 
     # Compute statistics for each metric
-    for metric in ['r2', 'rmse', 'mse', 'mae']:
+    for metric in ['r2', 'rmse', 'mse', 'mae', 'imputation_time']:
         values = [r[metric] for r in results_list]
         aggregated[f'{metric}_mean'] = float(np.mean(values))
         aggregated[f'{metric}_std'] = float(np.std(values, ddof=1))

@@ -35,7 +35,7 @@ class DAEConfig(BaseConfig):
 class KNNConfig(BaseConfig):
     """Configuration for KNN experiments."""
     # KNN-specific parameters
-    N_NEIGHBORS = [3, 5, 10, 20, 50]
+    N_NEIGHBORS = [3, 5, 10, 20, 30, 50, 75, 100, 125, 150, 200, 250, 300, 400]
     WEIGHTS = ['uniform', 'distance']
     METRICS = ['euclidean', 'manhattan', 'cosine']
 
