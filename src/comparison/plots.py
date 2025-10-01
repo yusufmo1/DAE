@@ -194,6 +194,11 @@ def plot_performance_vs_time(
 
             for config, metrics in results.items():
                 if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
+                    # For DAE, only include learning rate 0.001 (10^-3)
+                    if method_name == 'DAE':
+                        if 'lr0.001' not in config:
+                            continue
+
                     r2_values.append(metrics['r2_mean'])
                     # Get imputation time (all methods now have this)
                     time_values.append(metrics.get('imputation_time_mean', 0.001))
