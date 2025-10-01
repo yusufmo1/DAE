@@ -442,11 +442,6 @@ generate_all_comparisons(
 )
 ```
 
-## Contact
-
-For questions or issues:
-- Corresponding Author: m.elbadawi@qmul.ac.uk
-
 ## Troubleshooting
 
 ### MPS Not Available
