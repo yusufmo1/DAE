@@ -47,4 +47,4 @@ env/
 Thumbs.db
 
 # Data (comment out if you want to track data)
-# data/
+data/
