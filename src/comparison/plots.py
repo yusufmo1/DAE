@@ -80,62 +80,54 @@ def get_best_result(results: Dict, missingness_rate: float, metric: str = 'r2') 
 
 
 def plot_method_comparison(
-    dae_results: Dict,
-    knn_results: Dict,
-    zero_results: Dict,
+    method_results: Dict[str, Dict],
     save_path: Optional[str] = None,
     show: bool = True
 ):
     """
-    Plot R² comparison between DAE, KNN, and Zero imputation.
+    Plot R² comparison between all imputation methods.
 
     Args:
-        dae_results: DAE results dictionary
-        knn_results: KNN results dictionary
-        zero_results: Zero imputation results dictionary
+        method_results: Dictionary mapping method names to their results dictionaries
+                       e.g., {'DAE': dae_results, 'KNN': knn_results, 'Zero': zero_results, ...}
         save_path: Path to save figure
         show: Whether to display plot
     """
     missingness_rates = [0.01, 0.05, 0.10]
     x_pos = np.arange(len(missingness_rates))
-    width = 0.25
 
-    dae_means = []
-    dae_stds = []
-    knn_means = []
-    knn_stds = []
-    zero_means = []
-    zero_stds = []
+    n_methods = len(method_results)
+    width = 0.8 / n_methods  # Adjust width based on number of methods
 
-    for miss_rate in missingness_rates:
-        # Get best DAE result
-        _, dae_mean, dae_std = get_best_result(dae_results, miss_rate, 'r2')
-        dae_means.append(dae_mean)
-        dae_stds.append(dae_std)
+    # Colors for each method
+    color_map = {
+        'DAE': '#2ca02c',
+        'KNN': '#ff7f0e',
+        'Zero': '#d62728',
+        'Mean': '#9467bd',
+        'Median': '#8c564b'
+    }
 
-        # Get best KNN result
-        _, knn_mean, knn_std = get_best_result(knn_results, miss_rate, 'r2')
-        knn_means.append(knn_mean)
-        knn_stds.append(knn_std)
+    fig, ax = plt.subplots(figsize=(12, 6))
 
-        # Get Zero imputation result
-        _, zero_mean, zero_std = get_best_result(zero_results, miss_rate, 'r2')
-        zero_means.append(zero_mean)
-        zero_stds.append(zero_std)
+    # Plot bars for each method
+    for idx, (method_name, results) in enumerate(method_results.items()):
+        means = []
+        stds = []
 
-    fig, ax = plt.subplots(figsize=(10, 6))
+        for miss_rate in missingness_rates:
+            _, mean_val, std_val = get_best_result(results, miss_rate, 'r2')
+            means.append(mean_val)
+            stds.append(std_val)
 
-    # Plot bars
-    ax.bar(x_pos - width, dae_means, width, yerr=dae_stds,
-           label='DAE (Neural Network)', capsize=5, color='#2ca02c', alpha=0.8)
-    ax.bar(x_pos, knn_means, width, yerr=knn_stds,
-           label='KNN (Classical ML)', capsize=5, color='#ff7f0e', alpha=0.8)
-    ax.bar(x_pos + width, zero_means, width, yerr=zero_stds,
-           label='Zero Imputation (Naive)', capsize=5, color='#d62728', alpha=0.8)
+        offset = (idx - n_methods/2 + 0.5) * width
+        color = color_map.get(method_name, f'C{idx}')
+        ax.bar(x_pos + offset, means, width, yerr=stds,
+               label=method_name, capsize=5, color=color, alpha=0.8)
 
     ax.set_xlabel('Missingness Rate', fontweight='bold')
     ax.set_ylabel('R² Score', fontweight='bold')
-    ax.set_title('Method Comparison: DAE vs KNN vs Zero Imputation', fontweight='bold', fontsize=14)
+    ax.set_title('Method Comparison: All Imputation Methods', fontweight='bold', fontsize=14)
     ax.set_xticks(x_pos)
     ax.set_xticklabels([f'{mr*100:.0f}%' for mr in missingness_rates])
     ax.legend(loc='best')
@@ -156,9 +148,7 @@ def plot_method_comparison(
 
 
 def plot_performance_vs_time(
-    dae_results: Dict,
-    knn_results: Dict,
-    zero_results: Dict,
+    method_results: Dict[str, Dict],
     save_path: Optional[str] = None,
     show: bool = True
 ):
@@ -166,9 +156,7 @@ def plot_performance_vs_time(
     Plot performance vs. computational time trade-off.
 
     Args:
-        dae_results: DAE results dictionary
-        knn_results: KNN results dictionary
-        zero_results: Zero imputation results dictionary
+        method_results: Dictionary mapping method names to their results dictionaries
         save_path: Path to save figure
         show: Whether to display plot
     """
@@ -177,41 +165,46 @@ def plot_performance_vs_time(
 
     missingness_rates = [0.01, 0.05, 0.10]
 
+    # Colors and markers for each method
+    color_map = {
+        'DAE': '#2ca02c',
+        'KNN': '#ff7f0e',
+        'Zero': '#d62728',
+        'Mean': '#9467bd',
+        'Median': '#8c564b'
+    }
+    marker_map = {
+        'DAE': 'o',
+        'KNN': 'o',
+        'Zero': 'X',
+        'Mean': 's',
+        'Median': 'D'
+    }
+
     for idx, miss_rate in enumerate(missingness_rates):
         ax = axes[idx]
 
-        # Get all DAE results for this missingness
-        dae_r2 = []
-        dae_time = []
-        for config, metrics in dae_results.items():
-            if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
-                dae_r2.append(metrics['r2_mean'])
-                # DAE trains, so time is significant (use epochs as proxy)
-                dae_time.append(100)  # Placeholder - actual time not stored
+        # Plot each method
+        for method_name, results in method_results.items():
+            r2_values = []
+            time_values = []
 
-        # Get all KNN results for this missingness
-        knn_r2 = []
-        knn_time = []
-        for config, metrics in knn_results.items():
-            if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
-                knn_r2.append(metrics['r2_mean'])
-                knn_time.append(metrics.get('imputation_time_mean', 1))
+            for config, metrics in results.items():
+                if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
+                    r2_values.append(metrics['r2_mean'])
 
-        # Get Zero imputation result
-        zero_r2 = []
-        zero_time = []
-        for config, metrics in zero_results.items():
-            if f"miss{miss_rate}" in config and 'r2_mean' in metrics:
-                zero_r2.append(metrics['r2_mean'])
-                zero_time.append(metrics.get('imputation_time_mean', 0.001))
+                    # Get time - DAE uses placeholder, others use actual time
+                    if method_name == 'DAE':
+                        time_values.append(100)  # Placeholder
+                    else:
+                        time_values.append(metrics.get('imputation_time_mean', 0.001))
 
-        # Plot
-        if dae_r2:
-            ax.scatter(dae_time, dae_r2, s=50, alpha=0.6, color='#2ca02c', label='DAE')
-        if knn_r2:
-            ax.scatter(knn_time, knn_r2, s=50, alpha=0.6, color='#ff7f0e', label='KNN')
-        if zero_r2:
-            ax.scatter(zero_time, zero_r2, s=100, alpha=0.8, color='#d62728', marker='X', label='Zero')
+            if r2_values:
+                color = color_map.get(method_name, f'C{list(method_results.keys()).index(method_name)}')
+                marker = marker_map.get(method_name, 'o')
+                size = 100 if method_name in ['Zero', 'Mean', 'Median'] else 50
+                ax.scatter(time_values, r2_values, s=size, alpha=0.6 if method_name in ['DAE', 'KNN'] else 0.8,
+                          color=color, marker=marker, label=method_name)
 
         ax.set_xlabel('Time (log scale)', fontweight='bold')
         ax.set_ylabel('R² Score' if idx == 0 else '', fontweight='bold')
@@ -234,18 +227,14 @@ def plot_performance_vs_time(
 
 
 def generate_comparison_table(
-    dae_results: Dict,
-    knn_results: Dict,
-    zero_results: Dict,
+    method_results: Dict[str, Dict],
     save_path: Optional[str] = None
 ) -> str:
     """
-    Generate text table comparing best DAE, KNN, and Zero imputation results.
+    Generate text table comparing all imputation methods.
 
     Args:
-        dae_results: DAE results dictionary
-        knn_results: KNN results dictionary
-        zero_results: Zero imputation results dictionary
+        method_results: Dictionary mapping method names to their results dictionaries
         save_path: Path to save table
 
     Returns:
@@ -253,7 +242,7 @@ def generate_comparison_table(
     """
     table = []
     table.append("="*110)
-    table.append("METHOD COMPARISON: DAE vs KNN vs Zero Imputation")
+    table.append(f"METHOD COMPARISON: {' vs '.join(method_results.keys())}")
     table.append("="*110)
     table.append("")
     table.append(f"{'Missingness':<15} {'Method':<15} {'R²':<20} {'RMSE':<20} {'Config':<40}")
@@ -262,47 +251,28 @@ def generate_comparison_table(
     missingness_rates = [0.01, 0.05, 0.10]
 
     for miss_rate in missingness_rates:
-        # DAE best
-        dae_config, dae_r2, dae_r2_std = get_best_result(dae_results, miss_rate, 'r2')
-        _, dae_rmse, dae_rmse_std = get_best_result(dae_results, miss_rate, 'rmse')
+        method_scores = []
 
-        if dae_config:
-            table.append(f"{f'{miss_rate*100:.0f}%':<15} {'DAE':<15} "
-                        f"{f'{dae_r2:.4f}±{dae_r2_std:.4f}':<20} "
-                        f"{f'{dae_rmse:.4f}±{dae_rmse_std:.4f}':<20} "
-                        f"{dae_config[:40]:<40}")
+        # Process each method
+        for method_name, results in method_results.items():
+            config, r2, r2_std = get_best_result(results, miss_rate, 'r2')
+            _, rmse, rmse_std = get_best_result(results, miss_rate, 'rmse')
 
-        # KNN best
-        knn_config, knn_r2, knn_r2_std = get_best_result(knn_results, miss_rate, 'r2')
-        _, knn_rmse, knn_rmse_std = get_best_result(knn_results, miss_rate, 'rmse')
+            if config:
+                # First method shows missingness rate
+                prefix = f"{f'{miss_rate*100:.0f}%':<15}" if len(method_scores) == 0 else f"{'':<15}"
 
-        if knn_config:
-            table.append(f"{'':<15} {'KNN':<15} "
-                        f"{f'{knn_r2:.4f}±{knn_r2_std:.4f}':<20} "
-                        f"{f'{knn_rmse:.4f}±{knn_rmse_std:.4f}':<20} "
-                        f"{knn_config[:40]:<40}")
+                table.append(f"{prefix} {method_name:<15} "
+                            f"{f'{r2:.4f}±{r2_std:.4f}':<20} "
+                            f"{f'{rmse:.4f}±{rmse_std:.4f}':<20} "
+                            f"{config[:40]:<40}")
 
-        # Zero imputation
-        zero_config, zero_r2, zero_r2_std = get_best_result(zero_results, miss_rate, 'r2')
-        _, zero_rmse, zero_rmse_std = get_best_result(zero_results, miss_rate, 'rmse')
+                method_scores.append((method_name, r2))
 
-        if zero_config:
-            table.append(f"{'':<15} {'Zero':<15} "
-                        f"{f'{zero_r2:.4f}±{zero_r2_std:.4f}':<20} "
-                        f"{f'{zero_rmse:.4f}±{zero_rmse_std:.4f}':<20} "
-                        f"{zero_config[:40]:<40}")
-
-        # Winner
-        results = [
-            ('DAE', dae_r2) if dae_config else None,
-            ('KNN', knn_r2) if knn_config else None,
-            ('Zero', zero_r2) if zero_config else None
-        ]
-        results = [r for r in results if r is not None]
-
-        if results:
-            winner_name, winner_r2 = max(results, key=lambda x: x[1])
-            runner_up_r2 = sorted([r[1] for r in results], reverse=True)[1] if len(results) > 1 else 0
+        # Determine winner
+        if method_scores:
+            winner_name, winner_r2 = max(method_scores, key=lambda x: x[1])
+            runner_up_r2 = sorted([r[1] for r in method_scores], reverse=True)[1] if len(method_scores) > 1 else 0
             improvement = abs(winner_r2 - runner_up_r2) / max(abs(runner_up_r2), 0.0001) * 100
             table.append(f"{'':<15} {f'Winner: {winner_name} (+{improvement:.1f}%)':<55}")
 
@@ -324,7 +294,7 @@ def generate_comparison_table(
 def generate_all_comparisons(
     dae_results_dir: str = 'results/dae',
     knn_results_dir: str = 'results/knn',
-    zero_results_dir: str = 'results/baselines',
+    baseline_results_dir: str = 'results/baselines',
     output_dir: str = 'results/comparisons'
 ):
     """
@@ -333,7 +303,7 @@ def generate_all_comparisons(
     Args:
         dae_results_dir: Directory with DAE results
         knn_results_dir: Directory with KNN results
-        zero_results_dir: Directory with baseline results
+        baseline_results_dir: Directory with baseline results (contains zero, mean, median)
         output_dir: Directory to save comparisons
     """
     print("="*80)
@@ -344,21 +314,39 @@ def generate_all_comparisons(
     print("\nLoading results...")
     dae_results = load_results(dae_results_dir)
     knn_results = load_results(knn_results_dir)
-    zero_results = load_results(zero_results_dir)
+    baseline_results = load_results(baseline_results_dir)
 
     if not dae_results:
-        print("Warning: DAE results not found. Run main.py first.")
+        print("Warning: DAE results not found. Run run_dae.py first.")
     if not knn_results:
-        print("Warning: KNN results not found. Run knn_main.py first.")
-    if not zero_results:
-        print("Warning: Zero imputation results not found. Run zero baseline first.")
+        print("Warning: KNN results not found. Run run_knn.py first.")
+    if not baseline_results:
+        print("Warning: Baseline results not found. Run run_baseline.py first.")
 
-    if not (dae_results or knn_results or zero_results):
+    if not (dae_results or knn_results or baseline_results):
         print("Error: No results found. Cannot generate comparisons.")
         return
 
-    print(f"Loaded {len(dae_results)} DAE configs, {len(knn_results)} KNN configs, "
-          f"{len(zero_results)} Zero configs")
+    # Separate baseline results by method
+    zero_results = {k: v for k, v in baseline_results.items() if '_zero' in k}
+
+    print(f"Loaded results:")
+    print(f"  DAE: {len(dae_results)} configs")
+    print(f"  KNN: {len(knn_results)} configs")
+    print(f"  Zero: {len(zero_results)} configs")
+
+    # Create method results dictionary (excluding mean/median)
+    method_results = {}
+    if dae_results:
+        method_results['DAE'] = dae_results
+    if knn_results:
+        method_results['KNN'] = knn_results
+    if zero_results:
+        method_results['Zero'] = zero_results
+
+    if not method_results:
+        print("Error: No valid method results found.")
+        return
 
     # Create output directory
     os.makedirs(output_dir, exist_ok=True)
@@ -366,33 +354,26 @@ def generate_all_comparisons(
     # Generate plots
     print("\nGenerating comparison plots...")
 
-    if dae_results and knn_results and zero_results:
-        plot_method_comparison(
-            dae_results,
-            knn_results,
-            zero_results,
-            save_path=os.path.join(output_dir, 'method_comparison.png'),
-            show=False
-        )
+    plot_method_comparison(
+        method_results,
+        save_path=os.path.join(output_dir, 'method_comparison.png'),
+        show=False
+    )
 
-        plot_performance_vs_time(
-            dae_results,
-            knn_results,
-            zero_results,
-            save_path=os.path.join(output_dir, 'performance_vs_time.png'),
-            show=False
-        )
+    plot_performance_vs_time(
+        method_results,
+        save_path=os.path.join(output_dir, 'performance_vs_time.png'),
+        show=False
+    )
 
-        # Generate table
-        print("\nGenerating comparison table...")
-        table = generate_comparison_table(
-            dae_results,
-            knn_results,
-            zero_results,
-            save_path=os.path.join(output_dir, 'comparison_table.txt')
-        )
+    # Generate table
+    print("\nGenerating comparison table...")
+    table = generate_comparison_table(
+        method_results,
+        save_path=os.path.join(output_dir, 'comparison_table.txt')
+    )
 
-        print("\n" + table)
+    print("\n" + table)
 
     print("\n" + "="*80)
     print("COMPARISONS COMPLETE!")
@@ -401,6 +382,7 @@ def generate_all_comparisons(
     print("  - method_comparison.png")
     print("  - performance_vs_time.png")
     print("  - comparison_table.txt")
+    print(f"\nMethods compared: {', '.join(method_results.keys())}")
     print("\n" + "="*80)
 
 

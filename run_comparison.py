@@ -88,7 +88,7 @@ def main():
     generate_all_comparisons(
         dae_results_dir=dae_dir,
         knn_results_dir=knn_dir,
-        zero_results_dir=baseline_dir,
+        baseline_results_dir=baseline_dir,
         output_dir=output_dir
     )
 

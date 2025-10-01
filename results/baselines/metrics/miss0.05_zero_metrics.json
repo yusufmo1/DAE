@@ -5,8 +5,8 @@
   "rmse_std": 0.0008772385264431962,
   "mae_mean": 0.005036102866247758,
   "mae_std": 0.0001080425492273041,
-  "imputation_time_mean": 0.00067901611328125,
-  "imputation_time_std": 9.832177158490763e-06,
+  "imputation_time_mean": 0.0006123383839925131,
+  "imputation_time_std": 1.882383089162674e-05,
   "missingness_rate": 0.05,
   "num_seeds": 3,
   "seeds": [

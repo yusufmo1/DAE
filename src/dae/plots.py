@@ -70,9 +70,9 @@ def plot_dae_loss_curves(
 
         ax.set_xlabel('Epochs', fontweight='bold')
         ax.set_ylabel('Loss' if idx == 0 else '', fontweight='bold')
-        ax.set_title(f'({chr(65+idx)})      Learning Rate: {lr_label}',
+        ax.set_title(f'({chr(65+idx)}) LR={lr_label}',
                     fontweight='bold', loc='left')
-        ax.legend(loc='best')
+        ax.legend(loc='best', fontsize=9)
         ax.grid(True, alpha=0.3)
 
         # Set y-axis limits based on data
@@ -157,10 +157,10 @@ def plot_dae_r2_bars(
 
         ax.set_xlabel('Neurone size', fontweight='bold')
         ax.set_ylabel('R²' if idx == 0 else '', fontweight='bold')
-        ax.set_title(f'({chr(65+idx)})', fontweight='bold', loc='left')
+        ax.set_title(f'({chr(65+idx)}) LR={lr_label}', fontweight='bold', loc='left')
         ax.set_xticks(x_pos)
         ax.set_xticklabels(neuron_sizes)
-        ax.legend(loc='best')
+        ax.legend(loc='best', fontsize=9)
         ax.grid(True, alpha=0.3, axis='y')
         ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5, alpha=0.5)
 
