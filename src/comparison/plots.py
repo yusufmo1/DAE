@@ -103,6 +103,7 @@ def plot_method_comparison(
     color_map = {
         'DAE': '#2ca02c',
         'KNN': '#ff7f0e',
+        'MissForest': '#1f77b4',
         'Zero': '#d62728',
         'Mean': '#9467bd',
         'Median': '#8c564b'
@@ -169,6 +170,7 @@ def plot_performance_vs_time(
     color_map = {
         'DAE': '#2ca02c',
         'KNN': '#ff7f0e',
+        'MissForest': '#1f77b4',
         'Zero': '#d62728',
         'Mean': '#9467bd',
         'Median': '#8c564b'
@@ -176,6 +178,7 @@ def plot_performance_vs_time(
     marker_map = {
         'DAE': 'o',
         'KNN': 'o',
+        'MissForest': 's',
         'Zero': 'X',
         'Mean': 's',
         'Median': 'D'
@@ -317,7 +320,8 @@ def generate_comparison_table(
 def generate_all_comparisons(
     dae_results_dir: str = 'results/dae',
     knn_results_dir: str = 'results/knn',
-    baseline_results_dir: str = 'results/baselines',
+    missforest_results_dir: str = 'results/missforest',
+    zero_results_dir: str = 'results/baselines',
     output_dir: str = 'results/comparisons'
 ):
     """
@@ -326,7 +330,8 @@ def generate_all_comparisons(
     Args:
         dae_results_dir: Directory with DAE results
         knn_results_dir: Directory with KNN results
-        baseline_results_dir: Directory with baseline results (contains zero, mean, median)
+        missforest_results_dir: Directory with MissForest results
+        zero_results_dir: Directory with baseline results (contains zero, mean, median)
         output_dir: Directory to save comparisons
     """
     print("="*80)
@@ -337,16 +342,19 @@ def generate_all_comparisons(
     print("\nLoading results...")
     dae_results = load_results(dae_results_dir)
     knn_results = load_results(knn_results_dir)
-    baseline_results = load_results(baseline_results_dir)
+    missforest_results = load_results(missforest_results_dir)
+    baseline_results = load_results(zero_results_dir)
 
     if not dae_results:
         print("Warning: DAE results not found. Run run_dae.py first.")
     if not knn_results:
         print("Warning: KNN results not found. Run run_knn.py first.")
+    if not missforest_results:
+        print("Warning: MissForest results not found. Run run_missforest.py first.")
     if not baseline_results:
         print("Warning: Baseline results not found. Run run_baseline.py first.")
 
-    if not (dae_results or knn_results or baseline_results):
+    if not (dae_results or knn_results or missforest_results or baseline_results):
         print("Error: No results found. Cannot generate comparisons.")
         return
 
@@ -356,6 +364,7 @@ def generate_all_comparisons(
     print(f"Loaded results:")
     print(f"  DAE: {len(dae_results)} configs")
     print(f"  KNN: {len(knn_results)} configs")
+    print(f"  MissForest: {len(missforest_results)} configs")
     print(f"  Zero: {len(zero_results)} configs")
 
     # Create method results dictionary (excluding mean/median)
@@ -364,6 +373,8 @@ def generate_all_comparisons(
         method_results['DAE'] = dae_results
     if knn_results:
         method_results['KNN'] = knn_results
+    if missforest_results:
+        method_results['MissForest'] = missforest_results
     if zero_results:
         method_results['Zero'] = zero_results
 

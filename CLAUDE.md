@@ -4,94 +4,121 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This project implements **Denoising Autoencoders (DAEs)** for imputing missing values in pharmaceutical 3D printing formulation data. The dataset contains 1,570+ formulations across 382 ingredients with ~99% sparsity (most ingredients are unused in each formulation).
+This project implements **Denoising Autoencoders (DAEs)**, **MissForest**, and other ML methods for imputing missing values in pharmaceutical 3D printing formulation data. The dataset contains 1,570+ formulations across 382 ingredients with ~99% sparsity (most ingredients are unused in each formulation).
 
 Paper: "Machine Learning Recovers Corrupted Pharmaceutical 3D Printing Formulation Data" by Olima Uddin, Yusuf Ali Mohammed, Simon Gaisford, and Moe Elbadawi.
+
+**Dependency Management:** This project uses Poetry for dependency management (migrated from requirements.txt).
 
 ## Key Commands
 
 ### Run All Experiments (Recommended)
 
 ```bash
-# Quick test of all methods (~10 min total)
-python run_all.py --quick-test
+# Quick test of all methods (~15-20 min total)
+poetry run python run_all.py --quick-test
 
-# Full pipeline: DAE + KNN + Baselines + Comparisons
-python run_all.py
+# Full pipeline: DAE + KNN + MissForest + Baselines + Comparisons
+poetry run python run_all.py
 
 # Run all but skip specific methods (if already completed)
-python run_all.py --skip-dae
-python run_all.py --skip-knn --skip-baseline
+poetry run python run_all.py --skip-dae
+poetry run python run_all.py --skip-knn --skip-missforest --skip-baseline
 
 # Generate comparisons only (requires existing results)
-python run_all.py --comparison-only
+poetry run python run_all.py --comparison-only
 ```
 
 ### Running DAE Experiments
 
 ```bash
 # Quick test (5 min, recommended first run)
-python run_dae.py --quick-test
+poetry run python run_dae.py --quick-test
 
 # Full DAE experiments (~6-8 hours on Apple Silicon, ~24-48h on CPU)
-python run_dae.py
+poetry run python run_dae.py
 
 # Custom configurations
-python run_dae.py --missingness 0.01 --learning-rates 0.001 --neuron-sizes 512 --epochs 1000
-python run_dae.py --seeds 1 2 3 4 5
+poetry run python run_dae.py --missingness 0.01 --learning-rates 0.001 --neuron-sizes 512 --epochs 1000
+poetry run python run_dae.py --seeds 1 2 3 4 5
 
 # Generate plots only (skip training)
-python run_dae.py --skip-training
+poetry run python run_dae.py --skip-training
 ```
 
 ### Running KNN Baseline Experiments
 
 ```bash
 # Quick test (seconds, no training required)
-python run_knn.py --quick-test
+poetry run python run_knn.py --quick-test
 
 # Full KNN experiments (runs in parallel, ~15-30 min)
-python run_knn.py
+poetry run python run_knn.py
 
 # Custom KNN configurations
-python run_knn.py --k-neighbors 5 10 20 --weights uniform distance
-python run_knn.py --metrics euclidean manhattan cosine
-python run_knn.py --missingness 0.01 0.05 0.10
+poetry run python run_knn.py --k-neighbors 5 10 20 --weights uniform distance
+poetry run python run_knn.py --metrics euclidean manhattan cosine
+poetry run python run_knn.py --missingness 0.01 0.05 0.10
 
 # Run sequentially instead of parallel
-python run_knn.py --no-parallel
+poetry run python run_knn.py --no-parallel
 ```
+
+### Running MissForest Experiments
+
+```bash
+# Quick test (~5-10 min, reduced iterations)
+poetry run python run_missforest.py --quick-test
+
+# Full MissForest experiments (~4-8 hours, trains 336 RandomForests per iteration)
+poetry run python run_missforest.py
+
+# Custom configurations
+poetry run python run_missforest.py --missingness 0.01 0.05 0.10
+poetry run python run_missforest.py --max-iter 5
+poetry run python run_missforest.py --seeds 42 50 100
+
+# Generate plots only (skip training)
+poetry run python run_missforest.py --skip-training
+```
+
+**Note:** MissForest uses sklearn's `IterativeImputer` with `RandomForestRegressor`. It trains one RandomForest per feature (336 models in this dataset), making it computationally expensive but highly accurate.
 
 ### Running Baseline Experiments
 
 ```bash
 # Quick test (naive zero imputation)
-python run_baseline.py --quick-test
+poetry run python run_baseline.py --quick-test
 
 # Full baseline experiments
-python run_baseline.py
+poetry run python run_baseline.py
 
 # Custom configurations
-python run_baseline.py --missingness 0.01 0.05 0.10
-python run_baseline.py --seeds 42 50 100
+poetry run python run_baseline.py --missingness 0.01 0.05 0.10
+poetry run python run_baseline.py --seeds 42 50 100
 ```
 
 ### Generating Method Comparisons
 
-After running DAE, KNN, and baseline experiments:
+After running DAE, KNN, MissForest, and baseline experiments:
 ```bash
-python run_comparison.py
+poetry run python run_comparison.py
 ```
 
 This generates:
-- `results/comparisons/method_comparison.png` - R² comparison bar chart
+- `results/comparisons/method_comparison.png` - R² comparison bar chart (DAE vs KNN vs MissForest vs Zero)
 - `results/comparisons/performance_vs_time.png` - Performance vs. computational time
 - `results/comparisons/comparison_table.txt` - Detailed comparison table
 
 ### Installing Dependencies
 
 ```bash
-pip install -r requirements.txt
+# Install dependencies using Poetry
+poetry install
+
+# Alternative: activate Poetry shell
+poetry shell
+python run_all.py --quick-test
 ```
 
 ## Architecture & Data Flow
@@ -109,17 +136,25 @@ src/
 │   ├── model.py                 # DAE architecture & device selection
 │   ├── train.py                 # Training loop with masked loss
 │   ├── evaluate.py              # Metrics computation
+│   ├── experiments.py           # DAE orchestration
 │   └── plots.py                 # DAE-specific visualizations
 ├── knn/                 # K-Nearest Neighbors baseline
 │   ├── imputation.py            # KNN imputer (sklearn wrapper)
 │   ├── evaluate.py              # KNN metrics & timing
+│   ├── experiments.py           # KNN orchestration
 │   └── plots.py                 # KNN visualizations
+├── missforest/          # MissForest (IterativeImputer) method
+│   ├── imputation.py            # sklearn IterativeImputer + RandomForest
+│   ├── evaluate.py              # MissForest metrics & timing
+│   ├── experiments.py           # MissForest orchestration
+│   └── plots.py                 # MissForest visualizations
 ├── baselines/           # Additional baseline methods
 │   ├── zero_imputer.py          # Naive zero-filling baseline
 │   ├── evaluate.py              # Baseline metrics
+│   ├── experiments.py           # Baseline orchestration
 │   └── plots.py                 # Baseline visualizations
 └── comparison/          # Cross-method comparison tools
-    └── plots.py                 # DAE vs KNN vs Zero comparison plots
+    └── plots.py                 # DAE vs KNN vs MissForest vs Zero comparison plots
 ```
 
 ### DAE Pipeline Flow
@@ -279,13 +314,22 @@ results/
 │   │   ├── k_comparison_*.png
 │   │   └── weights_comparison_*.png
 │   └── summary.json              # All KNN experiment results
+├── missforest/                   # MissForest experiment outputs
+│   ├── metrics/                  # MissForest metrics JSON
+│   │   └── *_metrics.json        # R²/RMSE + imputation time
+│   ├── predictions/              # MissForest predictions NPZ
+│   │   └── *_predictions.npz     # Predictions + targets arrays
+│   ├── plots/                    # MissForest-specific figures
+│   │   ├── missforest_r2_bars.png
+│   │   └── miss*_predictions.png
+│   └── summary.json              # All MissForest experiment results
 ├── baselines/                    # Baseline method outputs
 │   ├── metrics/
 │   ├── predictions/
 │   ├── plots/
 │   └── summary.json
 └── comparisons/                  # Cross-method comparison outputs
-    ├── method_comparison.png     # R² bars: DAE vs KNN vs Zero
+    ├── method_comparison.png     # R² bars: DAE vs KNN vs MissForest vs Zero
     ├── performance_vs_time.png   # Performance vs. computation scatter
     └── comparison_table.txt      # Detailed comparison table
 ```
@@ -307,15 +351,27 @@ results/
 - Much faster than DAE (~15-30 min for all 90 experiments vs. ~6-8 hours for DAE)
 - Imputation time tracked for performance comparison
 
+### MissForest Implementation Details
+- Uses **sklearn's IterativeImputer** with **RandomForestRegressor** (not PyPI MissForest package)
+- **Why sklearn?** PyPI MissForest caused segmentation faults with 99% sparse pharmaceutical data
+- **Computational complexity:** Trains one RandomForest per feature (336 features = 336 models per iteration)
+- **Performance:** Slower than KNN, faster than DAE (~4-8 hours for full experiments)
+- **Algorithm:** Iterative chained equations - each feature predicted by all other features
+- Uses numpy arrays (converted from PyTorch tensors)
+- NaN used to mark missing values (sklearn convention)
+- **Default settings:** max_iter=10, n_estimators=100 per RandomForest
+- **Quick-test settings:** max_iter=5, n_estimators=10 (~5-10 min)
+
 ### Data Sparsity Handling
 - Dataset is ~99% sparse (zeros for unused ingredients)
 - Normalization preserves zeros (MinMaxScaler fits on entire range including zeros)
-- Both DAE and KNN must distinguish between "unused ingredient" (original zero) and "missing value" (masked non-zero)
+- All methods (DAE, KNN, MissForest) must distinguish between "unused ingredient" (original zero) and "missing value" (masked non-zero)
 - KNN handles sparsity naturally through distance metrics
 - DAE learns sparsity pattern through training
+- MissForest handles sparsity through RandomForest feature importance
 
 ### Reproducibility
-- Fixed seeds (42, 50, 100) used for data corruption across ALL methods (DAE, KNN, baselines)
+- Fixed seeds (42, 50, 100) used for data corruption across ALL methods (DAE, KNN, MissForest, baselines)
 - Seeds control: data corruption mask creation, noise generation, model initialization (DAE only)
 - Same corrupted data used for fair comparison between methods
 - Results aggregated across seeds with mean ± std reported
@@ -337,8 +393,9 @@ results/
 
 ### Method Comparison
 The codebase now supports comprehensive comparison between:
-- **DAE:** Neural network approach with denoising
-- **KNN:** Classical ML baseline (no training)
+- **DAE:** Neural network approach with denoising (deep learning)
+- **MissForest:** Iterative Random Forest imputation (ensemble learning)
+- **KNN:** Classical ML baseline (no training, instance-based)
 - **Zero imputation:** Naive baseline (fill with zeros)
 
-Use `generate_all_comparisons()` to create side-by-side performance comparisons after running experiments.
+Use `poetry run python run_comparison.py` to create side-by-side performance comparisons after running experiments.

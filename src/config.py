@@ -59,12 +59,29 @@ class BaselineConfig(BaseConfig):
     PLOTS_DIR = 'results/baselines/plots'
 
 
+class MissForestConfig(BaseConfig):
+    """Configuration for MissForest experiments."""
+    # MissForest-specific parameters
+    MAX_ITER = 10  # Maximum number of imputation iterations (paper default)
+    N_ESTIMATORS = 50  # Number of trees in forest (reduced from 100 for faster computation)
+    MAX_DEPTH = None  # Maximum tree depth (None = unlimited)
+    MIN_SAMPLES_LEAF = 1  # Minimum samples per leaf
+    N_JOBS = -1  # Use all CPU cores
+
+    # Output directories
+    RESULTS_DIR = 'results/missforest'
+    METRICS_DIR = 'results/missforest/metrics'
+    PREDICTIONS_DIR = 'results/missforest/predictions'
+    PLOTS_DIR = 'results/missforest/plots'
+
+
 class ComparisonConfig:
     """Configuration for cross-method comparisons."""
     # Input directories (results from other experiments)
     DAE_RESULTS_DIR = 'results/dae'
     KNN_RESULTS_DIR = 'results/knn'
     BASELINE_RESULTS_DIR = 'results/baselines'
+    MISSFOREST_RESULTS_DIR = 'results/missforest'
 
     # Output directory
     OUTPUT_DIR = 'results/comparisons'
@@ -86,13 +103,17 @@ class QuickTestConfig:
     KNN_WEIGHTS = ['distance']
     KNN_METRICS = ['euclidean']
 
+    # MissForest quick test
+    MISSFOREST_MAX_ITER = 2  # Reduced from 10 for faster testing
+    MISSFOREST_N_ESTIMATORS = 5  # Reduced from 100 for faster testing
+
 
 def get_config(method: str, quick_test: bool = False):
     """
     Get configuration for a specific method.
 
     Args:
-        method: Method name ('dae', 'knn', 'baseline', 'comparison')
+        method: Method name ('dae', 'knn', 'baseline', 'missforest', 'comparison')
         quick_test: If True, return quick test configuration
 
     Returns:
@@ -102,6 +123,7 @@ def get_config(method: str, quick_test: bool = False):
         'dae': DAEConfig,
         'knn': KNNConfig,
         'baseline': BaselineConfig,
+        'missforest': MissForestConfig,
         'comparison': ComparisonConfig
     }
 
@@ -110,7 +132,7 @@ def get_config(method: str, quick_test: bool = False):
 
     config_class = config_map[method]
 
-    if quick_test and method in ['dae', 'knn']:
+    if quick_test and method in ['dae', 'knn', 'missforest']:
         # Overlay quick test settings
         config = config_class()
         config.MISSINGNESS_RATES = QuickTestConfig.MISSINGNESS_RATES
@@ -124,6 +146,9 @@ def get_config(method: str, quick_test: bool = False):
             config.N_NEIGHBORS = QuickTestConfig.KNN_N_NEIGHBORS
             config.WEIGHTS = QuickTestConfig.KNN_WEIGHTS
             config.METRICS = QuickTestConfig.KNN_METRICS
+        elif method == 'missforest':
+            config.MAX_ITER = QuickTestConfig.MISSFOREST_MAX_ITER
+            config.N_ESTIMATORS = QuickTestConfig.MISSFOREST_N_ESTIMATORS
 
         return config
 
@@ -135,6 +160,7 @@ if __name__ == "__main__":
     print("\nAvailable configurations:")
     print("  - DAEConfig: Denoising Autoencoder settings")
     print("  - KNNConfig: K-Nearest Neighbors settings")
+    print("  - MissForestConfig: MissForest imputation settings")
     print("  - BaselineConfig: Baseline method settings")
     print("  - ComparisonConfig: Cross-method comparison settings")
     print("\nUse get_config(method) to retrieve configuration")
