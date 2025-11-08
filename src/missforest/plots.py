@@ -36,7 +36,10 @@ def plot_missforest_r2_bars(
         save_path: Path to save figure
         show: Whether to display the plot
     """
-    fig, ax = plt.subplots(figsize=(8, 6))
+    # Use 1x2 layout with plot left and legend right
+    fig, axes = plt.subplots(1, 2, figsize=(10, 4))
+    fig.suptitle(r'MissForest $R^2$ Scores Across Missingness Rates',
+                 fontsize=14, fontweight='bold')
 
     means = []
     stds = []
@@ -51,21 +54,32 @@ def plot_missforest_r2_bars(
             stds.append(results[key]['r2_std'])
             labels.append(f"{miss_rate*100:.0f}%")
 
+    # Plot on left subplot
+    ax = axes[0]
     x = np.arange(len(labels))
-    ax.bar(x, means, yerr=stds, capsize=5, color='#2ca02c', alpha=0.8, label='MissForest')
+    ax.bar(x, means, yerr=stds, capsize=5, color='#2ca02c', alpha=0.8)
 
-    ax.set_xlabel('Missingness Rate', fontweight='bold', fontsize=12)
-    ax.set_ylabel(r'$R^2$ Score', fontweight='bold', fontsize=12)
-    ax.set_title('MissForest Performance Across Missingness Rates',
-                 fontweight='bold', fontsize=14)
+    ax.set_xlabel('Missingness Rate', fontweight='bold')
+    ax.set_ylabel(r'$R^2$ Score', fontweight='bold')
+    ax.set_title('(A) MissForest Performance', fontweight='bold', loc='left')
     ax.set_xticks(x)
     ax.set_xticklabels(labels)
     ax.grid(True, alpha=0.3, axis='y')
-    ax.set_ylim(0, 1.0)
+    ax.axhline(y=0, color='red', linestyle='--', linewidth=1, alpha=0.5)
+
+    # Legend on right subplot
+    axes[1].axis('off')
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor='#2ca02c', alpha=0.8, label='MissForest (10 iter, 50 trees)')
+    ]
+    axes[1].legend(handles=legend_elements, loc='center', fontsize=11,
+                  frameon=True, fancybox=True, shadow=True)
 
     plt.tight_layout()
 
     if save_path:
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         print(f"Saved R² bar plot to {save_path}")
 
